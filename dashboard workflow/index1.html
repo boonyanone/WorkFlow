@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlowWork - Modular AI Assistant Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* FlowWork Core Styles */
+        :root {
+            --primary: #7c3aed;
+            --primary-light: #8b5cf6;
+            --primary-dark: #6d28d9;
+            --purple-50: #faf5ff;
+            --purple-100: #f3e8ff;
+            --purple-500: #a855f7;
+            --purple-600: #9333ea;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            --green-500: #10b981;
+            --green-600: #059669;
+            --orange-500: #f59e0b;
+            --orange-600: #d97706;
+            --red-500: #ef4444;
+            --red-600: #dc2626;
+        }
+        
+        * { box-sizing: border-box; }
+        
+        body {
+            background: var(--gray-50);
+            font-family: 'Noto Sans Thai', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-size: 14px;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            line-height: 1.5;
+        }
+        
+        /* System Alert */
+        .system-alert {
+            background: linear-gradient(135deg, var(--green-600) 0%, var(--green-500) 100%);
+            color: white;
+            text-align: center;
+            padding: 10px 20px;
+            font-size: 13px;
+            font-weight: 500;
+            height: 36px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+        
+        /* Header */
+        .top-header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--gray-200);
+            position: fixed;
+            top: 36px;
+            left: 0;
+            right: 0;
+            z-index: 999;
+            height: 64px;
+        }
+        
+        /* Layout */
+        .main-container {
+            display: flex;
+            min-height: 100vh;
+            padding-top: 100px;
+        }
+        
+        .sidebar {
+            background: white;
+            border-right: 1px solid var(--gray-200);
+            width: 280px;
+            position: fixed;
+            top: 100px;
+            left: 0;
+            bottom: 0;
+            z-index: 998;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .content-area {
+            flex: 1;
+            margin-left: 280px;
+            margin-right: 340px;
+            min-height: calc(100vh - 100px);
+            overflow-x: hidden;
+            padding: 24px;
+        }
+        
+        .right-panel {
+            background: white;
+            border-left: 1px solid var(--gray-200);
+            width: 340px;
+            position: fixed;
+            top: 100px;
+            right: 0;
+            bottom: 0;
+            z-index: 997;
+            overflow-y: auto;
+        }
+        
+        /* Navigation */
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            border-radius: 12px;
+            color: var(--gray-600);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 4px;
+            transition: all 0.2s ease;
+            position: relative;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+        
+        .menu-item:hover {
+            background: var(--gray-100);
+            color: var(--gray-900);
+            transform: translateX(2px);
+        }
+        
+        .menu-item.active {
+            background: linear-gradient(135deg, var(--purple-100) 0%, var(--purple-50) 100%);
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        .menu-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 20px;
+            background: var(--primary);
+            border-radius: 0 4px 4px 0;
+        }
+        
+        /* Module Styles */
+        .research-header-controls {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            padding: 16px 20px;
+            background: white;
+            border-radius: 16px;
+            border: 2px solid var(--purple-200);
+        }
+        
+        .research-model-selector {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--purple-50);
+            padding: 8px 16px;
+            border-radius: 12px;
+            border: 2px solid var(--purple-200);
+        }
+        
+        .suggestion-categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .suggestion-category {
+            background: white;
+            border: 2px solid var(--purple-200);
+            border-radius: 16px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .suggestion-category:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(124, 58, 237, 0.15);
+        }
+        
+        .suggestion-item {
+            background: var(--purple-50);
+            border: 1px solid var(--purple-200);
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .suggestion-item:hover {
+            background: var(--purple-100);
+            border-color: var(--primary);
+        }
+        
+        .suggestion-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        /* Mobile */
+        @media (max-width: 1280px) {
+            .right-panel { display: none; }
+            .content-area { margin-right: 0; }
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.mobile-show { transform: translateX(0); }
+            .content-area { margin-left: 0; padding: 16px; }
+            .suggestion-categories { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- System Alert -->
+    <div class="system-alert">
+        <div class="flex items-center justify-center space-x-3">
+            <i class="fas fa-rocket"></i>
+            <span>🚀 FlowWork Modular</span>
+            <span class="opacity-75">•</span>
+            <span>✅ Module System Active</span>
+            <span class="opacity-75">•</span>
+            <span>🧠 AI Research Ready</span>
+            <span class="opacity-75">•</span>
+            <span class="animate-pulse">⚡ Dynamic Loading!</span>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="top-header">
+        <div class="flex items-center justify-between h-full px-6">
+            <!-- Left Section -->
+            <div class="flex items-center space-x-6">
+                <button onclick="toggleMobileSidebar()" class="lg:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                    <i class="fas fa-bars text-gray-600"></i>
+                </button>
+                
+                <div class="flex items-center space-x-4">
+                    <div class="w-8 h-8 bg-gradient-to-br from-purple-600 to-purple-500 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-rocket text-white text-sm"></i>
+                    </div>
+                    <span class="text-xl font-bold bg-gradient-to-r from-purple-600 to-purple-500 bg-clip-text text-transparent">FlowWork</span>
+                    <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">v2.0 Modular</span>
+                </div>
+            </div>
+
+            <!-- Center Search -->
+            <div class="flex-1 max-w-lg mx-6">
+                <div class="relative">
+                    <input type="text" 
+                           placeholder="Ask AI anything... (Ctrl+K)"
+                           class="w-full px-4 py-3 pl-12 pr-20 bg-white border-2 border-gray-200 rounded-lg focus:border-purple-500 focus:outline-none">
+                    <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                </div>
+            </div>
+
+            <!-- Right Section -->
+            <div class="flex items-center space-x-4">
+                <!-- Credits -->
+                <div class="bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-xl px-4 py-2 flex items-center space-x-2">
+                    <i class="fas fa-coins text-yellow-600"></i>
+                    <span class="font-semibold text-yellow-800" id="creditsCount">1,246</span>
+                    <span class="text-xs text-yellow-600">credits</span>
+                </div>
+
+                <!-- User -->
+                <div class="relative">
+                    <button class="flex items-center space-x-2 p-1 hover:bg-gray-50 rounded-lg transition-colors">
+                        <div class="w-8 h-8 bg-gradient-to-br from-purple-600 to-purple-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                            โล่
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        
+        <!-- Sidebar -->
+        <aside id="sidebar" class="sidebar">
+            <div class="flex flex-col h-full">
+                <!-- Navigation -->
+                <div class="flex-1 py-6">
+                    <!-- Main -->
+                    <div class="px-4 mb-6">
+                        <div class="menu-item active" onclick="FlowWork.loadModule('dashboard')">
+                            <i class="fas fa-home w-5"></i>
+                            <span class="ml-3">Dashboard</span>
+                        </div>
+                        
+                        <div class="menu-item" onclick="FlowWork.loadModule('ai-research')">
+                            <i class="fas fa-brain w-5"></i>
+                            <span class="ml-3">AI Research</span>
+                            <span class="ml-auto bg-green-100 text-green-600 text-xs px-2 py-1 rounded-full">Module</span>
+                        </div>
+                        
+                        <div class="menu-item" onclick="FlowWork.loadModule('documents')">
+                            <i class="fas fa-file-alt w-5"></i>
+                            <span class="ml-3">Documents</span>
+                        </div>
+                        
+                        <div class="menu-item" onclick="FlowWork.loadModule('team-workspace')">
+                            <i class="fas fa-users w-5"></i>
+                            <span class="ml-3">Team Workspace</span>
+                        </div>
+                    </div>
+
+                    <!-- Meeting Intelligence -->
+                    <div class="px-4 mb-6">
+                        <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-3">
+                            Meeting Intelligence
+                        </div>
+                        
+                        <div class="menu-item" onclick="FlowWork.loadModule('meeting-hub')">
+                            <i class="fas fa-microphone w-5"></i>
+                            <span class="ml-3">Meeting Hub</span>
+                        </div>
+                        
+                        <div class="menu-item" onclick="FlowWork.loadModule('live-recording')">
+                            <i class="fas fa-record-vinyl w-5 text-red-500"></i>
+                            <span class="ml-3">Live Recording</span>
+                        </div>
+                        
+                        <div class="menu-item" onclick="FlowWork.loadModule('action-items')">
+                            <i class="fas fa-tasks w-5"></i>
+                            <span class="ml-3">Action Items</span>
+                        </div>
+                    </div>
+
+                    <!-- Tools & Analytics -->
+                    <div class="px-4 mb-6">
+                        <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-3">
+                            Tools & Analytics
+                        </div>
+                        
+                        <div class="menu-item" onclick="FlowWork.loadModule('analytics')">
+                            <i class="fas fa-chart-bar w-5"></i>
+                            <span class="ml-3">Analytics</span>
+                        </div>
+                        
+                        <div class="menu-item" onclick="FlowWork.loadModule('integrations')">
+                            <i class="fas fa-plug w-5"></i>
+                            <span class="ml-3">Integrations</span>
+                        </div>
+                        
+                        <div class="menu-item" onclick="FlowWork.loadModule('settings')">
+                            <i class="fas fa-cog w-5"></i>
+                            <span class="ml-3">Settings</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- User Account -->
+                <div class="border-t border-gray-200 p-4">
+                    <div class="flex items-center space-x-3 mb-3">
+                        <div class="w-10 h-10 bg-gradient-to-br from-purple-600 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold">
+                            โล่
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="font-semibold text-gray-900 truncate">โล่</div>
+                            <div class="text-sm text-gray-500 truncate">Team Leader</div>
+                        </div>
+                        <div class="bg-green-100 text-green-600 text-xs px-2 py-1 rounded-full">Online</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Content Area -->
+        <main class="content-area" id="contentArea">
+            <!-- Modules will be loaded here -->
+            <div class="text-center py-20">
+                <div class="animate-spin rounded-full h-16 w-16 border-b-4 border-purple-600 mx-auto mb-4"></div>
+                <h3 class="text-xl font-semibold text-gray-900 mb-2">Initializing FlowWork</h3>
+                <p class="text-gray-600">Setting up modular system...</p>
+            </div>
+        </main>
+
+        <!-- Right Panel -->
+        <aside class="right-panel" id="rightPanel">
+            <div class="p-6">
+                <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Module Status</h3>
+                <div class="space-y-3">
+                    <div class="bg-green-50 border border-green-200 rounded-lg p-3">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <div class="text-sm font-medium text-green-900">System Status</div>
+                                <div class="text-xs text-green-700">Modular architecture active</div>
+                            </div>
+                            <div class="text-lg">🚀</div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <div class="text-sm font-medium text-blue-900">AI Research</div>
+                                <div class="text-xs text-blue-700">Module ready</div>
+                            </div>
+                            <div class="text-lg">🧠</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Initialize App -->
+    <script type="module">
+        import FlowWorkManager from './app.js';
+        
+        // Initialize when DOM is ready
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('🚀 Starting FlowWork Modular System...');
+            // Initialize Module Manager
+           const success = await FlowWorkManager.init('#contentArea');
+           
+           if (success) {
+               // Load default module (dashboard)
+               await FlowWorkManager.loadModule('dashboard');
+               
+               // Show success notification
+               setTimeout(() => {
+                   FlowWork.showNotification('🎉 FlowWork Modular System Ready!', 'success');
+               }, 1000);
+               
+               console.log('✅ FlowWork Modular System initialized successfully');
+           } else {
+               console.error('❌ Failed to initialize FlowWork Modular System');
+               
+               // Show error message
+               document.getElementById('contentArea').innerHTML = `
+                   <div class="text-center py-20">
+                       <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                           <i class="fas fa-exclamation-triangle text-red-600 text-2xl"></i>
+                       </div>
+                       <h3 class="text-xl font-semibold text-gray-900 mb-2">Initialization Failed</h3>
+                       <p class="text-gray-600 mb-4">Unable to start the modular system</p>
+                       <button onclick="location.reload()" class="bg-purple-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-purple-700 transition-colors">
+                           <i class="fas fa-refresh mr-2"></i>Retry
+                       </button>
+                   </div>
+               `;
+           }
+       });
+       
+       // Global functions for navigation
+       window.toggleMobileSidebar = () => {
+           const sidebar = document.getElementById('sidebar');
+           sidebar.classList.toggle('mobile-show');
+       };
+       
+       // Keyboard shortcuts
+       document.addEventListener('keydown', (e) => {
+           // Ctrl/Cmd + K for search focus
+           if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+               e.preventDefault();
+               const searchInput = document.querySelector('input[placeholder*="Ask AI"]');
+               if (searchInput) searchInput.focus();
+           }
+           
+           // Ctrl/Cmd + 1-9 for quick module switching
+           if ((e.ctrlKey || e.metaKey) && e.key >= '1' && e.key <= '9') {
+               e.preventDefault();
+               const moduleMap = {
+                   '1': 'dashboard',
+                   '2': 'ai-research', 
+                   '3': 'meeting-hub',
+                   '4': 'live-recording',
+                   '5': 'documents',
+                   '6': 'team-workspace',
+                   '7': 'action-items',
+                   '8': 'analytics',
+                   '9': 'settings'
+               };
+               
+               const moduleName = moduleMap[e.key];
+               if (moduleName) {
+                   FlowWork.loadModule(moduleName);
+               }
+           }
+       });
+       
+       // Handle browser back/forward
+       window.addEventListener('popstate', (e) => {
+           const state = e.state;
+           if (state && state.module) {
+               FlowWorkManager.loadModule(state.module);
+           }
+       });
+       
+       // Update browser history when module changes
+       FlowWorkManager.on('module.loaded', (e) => {
+           const module = e.detail.module;
+           history.pushState({ module }, `FlowWork - ${module}`, `#${module}`);
+       });
+   </script>
+</body>
+</html>
