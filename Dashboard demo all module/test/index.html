@@ -1,0 +1,2280 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlowWork - Complete AI Assistant Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* 🎨 Enhanced FlowWork Theme - AI-First Design */
+        :root {
+            --primary: #7c3aed;
+            --primary-light: #8b5cf6;
+            --primary-dark: #6d28d9;
+            --purple-50: #faf5ff;
+            --purple-100: #f3e8ff;
+            --purple-500: #a855f7;
+            --purple-600: #9333ea;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            
+            /* 📏 Layout Variables */
+            --header-height: 64px;
+            --alert-height: 36px;
+            --sidebar-width: 280px;
+            --sidebar-collapsed: 70px;
+            --right-panel-width: 340px;
+            
+            /* 🎭 Animation Variables */
+            --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-quick: all 0.15s ease;
+            --shadow-soft: 0 2px 8px 0 rgb(0 0 0 / 0.08);
+            --shadow-medium: 0 4px 16px 0 rgb(0 0 0 / 0.12);
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: var(--gray-50);
+            font-family: 'Noto Sans Thai', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-size: 14px;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            line-height: 1.5;
+        }
+        
+        /* 🟢 Enhanced System Alert */
+        .system-alert {
+            background: linear-gradient(135deg, #059669 0%, #10b981 50%, #34d399 100%);
+            color: white;
+            text-align: center;
+            padding: 10px 20px;
+            font-size: 13px;
+            font-weight: 500;
+            height: var(--alert-height);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: var(--shadow-soft);
+            animation: slideDown 0.5s ease-out;
+        }
+        
+        @keyframes slideDown {
+            from { 
+                transform: translateY(-100%); 
+                opacity: 0;
+            }
+            to { 
+                transform: translateY(0); 
+                opacity: 1;
+            }
+        }
+        
+        /* 🎯 Enhanced Header with AI Model Selector */
+        .top-header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--gray-200);
+            position: fixed;
+            top: var(--alert-height);
+            left: 0;
+            right: 0;
+            z-index: 999;
+            height: var(--header-height);
+            box-shadow: var(--shadow-soft);
+        }
+        
+        /* 🤖 AI Model Selector */
+        .ai-model-selector {
+            background: var(--purple-50);
+            border: 2px solid var(--purple-200);
+            border-radius: 12px;
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: var(--transition-quick);
+            position: relative;
+        }
+        
+        .ai-model-selector:hover {
+            border-color: var(--primary);
+            background: var(--purple-100);
+        }
+        
+        .ai-model-selector.active {
+            border-color: var(--primary);
+            background: var(--purple-100);
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+        }
+        
+        .ai-model-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid var(--gray-200);
+            border-radius: 12px;
+            box-shadow: var(--shadow-medium);
+            z-index: 100;
+            margin-top: 4px;
+            overflow: hidden;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: var(--transition-smooth);
+        }
+        
+        .ai-model-dropdown.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        
+        .ai-model-option {
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: var(--transition-quick);
+            border-bottom: 1px solid var(--gray-100);
+        }
+        
+        .ai-model-option:last-child {
+            border-bottom: none;
+        }
+        
+        .ai-model-option:hover {
+            background: var(--purple-50);
+        }
+        
+        .ai-model-option.selected {
+            background: var(--purple-100);
+            color: var(--primary);
+        }
+        
+        /* 📱 Responsive Layout Container */
+        .main-container {
+            display: flex;
+            min-height: 100vh;
+            padding-top: calc(var(--alert-height) + var(--header-height));
+        }
+        
+        /* 🎛️ Enhanced Sidebar */
+        .sidebar {
+            background: white;
+            border-right: 1px solid var(--gray-200);
+            width: var(--sidebar-width);
+            transition: var(--transition-smooth);
+            position: fixed;
+            top: calc(var(--alert-height) + var(--header-height));
+            left: 0;
+            bottom: 0;
+            z-index: 998;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-soft);
+        }
+        
+        .sidebar.collapsed {
+            width: var(--sidebar-collapsed);
+        }
+        
+        .sidebar.mobile-hidden {
+            transform: translateX(-100%);
+        }
+        
+        /* 📄 Smart Content Area */
+        .content-area {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            margin-right: var(--right-panel-width);
+            transition: var(--transition-smooth);
+            min-height: calc(100vh - var(--alert-height) - var(--header-height));
+            overflow-x: hidden;
+            padding: 24px;
+        }
+        
+        .content-area.sidebar-collapsed {
+            margin-left: var(--sidebar-collapsed);
+        }
+        
+        .content-area.mobile-full {
+            margin-left: 0;
+            margin-right: 0;
+        }
+        
+        /* 🎯 Right Panel - Real-time Collaboration */
+        .right-panel {
+            background: white;
+            border-left: 1px solid var(--gray-200);
+            width: var(--right-panel-width);
+            position: fixed;
+            top: calc(var(--alert-height) + var(--header-height));
+            right: 0;
+            bottom: 0;
+            z-index: 997;
+            overflow-y: auto;
+            box-shadow: var(--shadow-soft);
+        }
+        
+        .right-panel.mobile-hidden {
+            transform: translateX(100%);
+        }
+        
+        /* 🎨 Enhanced Component Styles */
+        .logo {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--purple-500) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+        }
+        
+        .search-enhanced {
+            background: white;
+            border: 2px solid var(--gray-200);
+            border-radius: 16px;
+            transition: var(--transition-smooth);
+            font-size: 14px;
+            box-shadow: var(--shadow-soft);
+        }
+        
+        .search-enhanced:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1), var(--shadow-medium);
+            outline: none;
+        }
+        
+        /* 🎭 Context-Aware Zones */
+        .context-zone {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow-soft);
+            border: 1px solid var(--gray-200);
+            transition: var(--transition-smooth);
+        }
+        
+        .context-zone:hover {
+            box-shadow: var(--shadow-medium);
+            border-color: var(--gray-300);
+        }
+        
+        .context-zone.priority-high {
+            border-left: 4px solid #ef4444;
+        }
+        
+        .context-zone.priority-medium {
+            border-left: 4px solid #f59e0b;
+        }
+        
+        .context-zone.priority-low {
+            border-left: 4px solid #10b981;
+        }
+        
+        .context-zone.ai-active {
+            border-left: 4px solid var(--primary);
+            background: linear-gradient(135deg, var(--purple-50) 0%, white 100%);
+        }
+        
+        /* 🚀 Enhanced Menu Items */
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            border-radius: 12px;
+            color: var(--gray-600);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 4px;
+            transition: var(--transition-quick);
+            position: relative;
+            white-space: nowrap;
+        }
+        
+        .menu-item:hover {
+            background: var(--gray-100);
+            color: var(--gray-900);
+            transform: translateX(2px);
+        }
+        
+        .menu-item.active {
+            background: linear-gradient(135deg, var(--purple-100) 0%, var(--purple-50) 100%);
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        .menu-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 20px;
+            background: var(--primary);
+            border-radius: 0 4px 4px 0;
+        }
+        
+        /* 🎯 Quick Action Cards */
+        .quick-action-card {
+            background: white;
+            border: 2px solid var(--gray-200);
+            border-radius: 12px;
+            padding: 16px;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .quick-action-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--purple-500) 100%);
+            transform: scaleX(0);
+            transition: var(--transition-smooth);
+        }
+        
+        .quick-action-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+        }
+        
+        .quick-action-card:hover::before {
+            transform: scaleX(1);
+        }
+        
+        /* 🤖 AI Response Enhanced */
+        .ai-response {
+            background: linear-gradient(135deg, var(--purple-50) 0%, white 100%);
+            border: 2px solid var(--purple-200);
+            border-radius: 16px;
+            padding: 24px;
+            margin: 20px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .ai-response::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 6px;
+            background: linear-gradient(180deg, var(--primary) 0%, var(--purple-500) 100%);
+        }
+        
+        /* 📊 Dashboard Widgets */
+        .dashboard-widget {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: var(--shadow-soft);
+            border: 1px solid var(--gray-200);
+            transition: var(--transition-smooth);
+        }
+        
+        .dashboard-widget:hover {
+            box-shadow: var(--shadow-medium);
+            transform: translateY(-1px);
+        }
+        
+        .widget-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .widget-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--gray-900);
+        }
+        
+        .widget-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        
+        /* 🎭 Status Indicators */
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .status-indicator.online {
+            background: #dcfce7;
+            color: #166534;
+        }
+        
+        .status-indicator.busy {
+            background: #fef3c7;
+            color: #d97706;
+        }
+        
+        .status-indicator.away {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+        
+        .status-indicator.ai-processing {
+            background: var(--purple-100);
+            color: var(--primary);
+            animation: pulse 2s infinite;
+        }
+        
+        /* 📱 Responsive Design */
+        @media (max-width: 1280px) {
+            .right-panel {
+                display: none;
+            }
+            .content-area {
+                margin-right: 0;
+            }
+        }
+        
+        @media (max-width: 1024px) {
+            .sidebar.collapsed {
+                width: var(--sidebar-collapsed);
+            }
+            .content-area.sidebar-collapsed {
+                margin-left: var(--sidebar-collapsed);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.mobile-show {
+                transform: translateX(0);
+            }
+            .content-area {
+                margin-left: 0;
+                padding: 16px;
+            }
+            .ai-model-selector {
+                display: none;
+            }
+        }
+        
+        /* 🎨 Enhanced Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+        
+        @keyframes shimmer {
+            0% {
+                transform: translateX(-100%);
+            }
+            100% {
+                transform: translateX(100%);
+            }
+        }
+        
+        .loading-shimmer {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .loading-shimmer::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+            animation: shimmer 1.5s infinite;
+        }
+        
+        /* 🎯 Utility Classes */
+        .fade-in {
+            animation: fadeInUp 0.5s ease-out;
+        }
+        
+        .text-gradient {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--purple-500) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 🟢 Enhanced System Status Alert -->
+    <div class="system-alert">
+        <div class="flex items-center justify-center space-x-3">
+            <i class="fas fa-check-circle"></i>
+            <span>ระบบ FlowWork ทำงานปกติ</span>
+            <span class="opacity-75">•</span>
+            <span>AI Services พร้อมใช้งาน</span>
+            <span class="opacity-75">•</span>
+            <span>เซิร์ฟเวอร์ทำงาน 100%</span>
+            <span class="opacity-75">•</span>
+            <span class="animate-pulse">🚀 เพิ่งอัปเดต AI Models ใหม่!</span>
+        </div>
+    </div>
+
+    <!-- 🎯 Enhanced Top Header -->
+    <header class="top-header">
+        <div class="flex items-center justify-between h-full px-6">
+            <!-- Left Section -->
+            <div class="flex items-center space-x-6">
+                <button onclick="toggleSidebar()" class="lg:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                    <i class="fas fa-bars text-gray-600"></i>
+                </button>
+                
+                <div class="flex items-center space-x-4">
+                    <div class="w-8 h-8 bg-gradient-to-br from-purple-600 to-purple-500 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-rocket text-white text-sm"></i>
+                    </div>
+                    <span class="logo text-xl font-bold">FlowWork</span>
+                    <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">v2.1</span>
+                </div>
+                
+                <!-- 🤖 AI Model Selector -->
+                <div class="ai-model-selector" onclick="toggleAIModelDropdown()">
+                    <div class="w-6 h-6 bg-gradient-to-br from-purple-600 to-indigo-600 rounded-full flex items-center justify-center">
+                        <i class="fas fa-brain text-white text-xs"></i>
+                    </div>
+                    <div>
+                        <div class="font-semibold text-sm" id="selectedModel">GPT-4</div>
+                        <div class="text-xs text-gray-500" id="selectedPrice">฿0.08/query</div>
+                    </div>
+                    <i class="fas fa-chevron-down text-xs text-gray-400"></i>
+                    
+                    <!-- AI Model Dropdown -->
+                    <div class="ai-model-dropdown" id="aiModelDropdown">
+                        <div class="ai-model-option selected" onclick="selectAIModel('GPT-4', '฿0.08/query', 'Complex reasoning')">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-brain text-green-600 text-xs"></i>
+                                </div>
+                                <div>
+                                    <div class="font-medium">GPT-4 Turbo</div>
+                                    <div class="text-xs text-gray-500">Complex reasoning</div>
+                                </div>
+                            </div>
+                            <div class="text-sm font-medium text-green-600">฿0.08</div>
+                        </div>
+                        
+                        <div class="ai-model-option" onclick="selectAIModel('Claude-3', '฿0.05/query', 'Balanced performance')">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-robot text-blue-600 text-xs"></i>
+                                </div>
+                                <div>
+                                    <div class="font-medium">Claude-3 Sonnet</div>
+                                    <div class="text-xs text-gray-500">Balanced performance</div>
+                                </div>
+                            </div>
+                            <div class="text-sm font-medium text-blue-600">฿0.05</div>
+                        </div>
+                        
+                        <div class="ai-model-option" onclick="selectAIModel('Gemini', '฿0.02/query', 'Cost effective')">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-gem text-purple-600 text-xs"></i>
+                                </div>
+                                <div>
+                                    <div class="font-medium">Gemini Pro</div>
+                                    <div class="text-xs text-gray-500">Cost effective</div>
+                                </div>
+                            </div>
+                            <div class="text-sm font-medium text-purple-600">฿0.02</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Center - Enhanced Search -->
+            <div class="flex-1 max-w-lg mx-6">
+                <div class="relative">
+                    <input type="text" 
+                           placeholder="Ask AI anything... (Ctrl+K)"
+                           class="search-enhanced w-full px-4 py-3 pl-12 pr-20 focus:outline-none"
+                           onkeydown="handleGlobalSearch(event)">
+                    <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    <div class="absolute right-3 top-1/2 transform -translate-y-1/2 flex space-x-2">
+                        <button class="p-1 text-gray-400 hover:text-purple-600 transition-colors">
+                            <i class="fas fa-microphone text-sm"></i>
+                        </button>
+                        <button class="p-1 text-gray-400 hover:text-purple-600 transition-colors">
+                            <i class="fas fa-camera text-sm"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Section -->
+            <div class="flex items-center space-x-4">
+                <!-- Credit Display -->
+                <div class="bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-xl px-4 py-2 flex items-center space-x-2">
+                    <i class="fas fa-coins text-yellow-600"></i>
+                    <span class="font-semibold text-yellow-800">1,246</span>
+                    <span class="text-xs text-yellow-600">credits</span>
+                </div>
+
+                <!-- Team Selector -->
+                <button class="flex items-center space-x-2 px-3 py-2 hover:bg-gray-50 rounded-lg transition-colors">
+                    <i class="fas fa-users text-gray-600"></i>
+                    <span class="hidden md:block text-sm text-gray-700">ทีมการตลาด</span>
+                    <i class="fas fa-chevron-down text-xs text-gray-400"></i>
+                </button>
+
+                <!-- Notifications -->
+                <div class="relative">
+                    <button class="p-2 hover:bg-gray-50 rounded-lg relative transition-colors">
+                        <i class="fas fa-bell text-gray-600"></i>
+                        <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">3</span>
+                    </button>
+                </div>
+
+                <!-- User Menu -->
+                <div class="relative">
+                    <button class="flex items-center space-x-2 p-1 hover:bg-gray-50 rounded-lg transition-colors">
+                        <div class="w-8 h-8 bg-gradient-to-br from-purple-600 to-purple-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                            โล่
+                        </div>
+                        <i class="fas fa-chevron-down text-xs text-gray-400 hidden md:block"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 📱 Main Container -->
+    <div class="main-container">
+        
+        <!-- 🎛️ Enhanced Left Sidebar -->
+        <aside id="sidebar" class="sidebar">
+            <div class="flex flex-col h-full">
+                <!-- Navigation -->
+                <div class="flex-1 py-6">
+                    <!-- Main Navigation -->
+                    <div class="px-4 mb-6">
+                        <a href="#" class="menu-item active" onclick="showDashboard()">
+                            <i class="fas fa-home w-5"></i>
+                            <span class="ml-3">Dashboard</span>
+                        </a>
+                        
+                        <a href="#" class="menu-item" onclick="showAIResearch()">
+                            <i class="fas fa-brain w-5"></i>
+                            <span class="ml-3">AI Research</span>
+                            <span class="ml-auto bg-purple-100 text-purple-600 text-xs px-2 py-1 rounded-full">New</span>
+                        </a>
+                        
+                        <a href="#" class="menu-item" onclick="showDocuments()">
+                            <i class="fas fa-file-alt w-5"></i>
+                            <span class="ml-3">Documents</span>
+                            <span class="ml-auto text-xs text-gray-400">24</span>
+                        </a>
+                        
+                        <a href="#" class="menu-item" onclick="showTeamWorkspace()">
+                            <i class="fas fa-users w-5"></i>
+                            <span class="ml-3">Team Workspace</span>
+                            <span class="ml-auto bg-blue-100 text-blue-600 text-xs px-2 py-1 rounded-full">8</span>
+                        </a>
+                    </div>
+
+                    <!-- Meeting Intelligence Section -->
+                   <div class="px-4 mb-6">
+                    <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-3">
+                        Meeting Intelligence
+                    </div>
+                    
+                    <a href="#" class="menu-item" onclick="showMeetingHub()">
+                        <i class="fas fa-microphone w-5"></i>
+                        <span class="ml-3">Meeting Hub</span>
+                        <span class="ml-auto bg-purple-100 text-purple-600 text-xs px-2 py-1 rounded-full">AI</span>
+                    </a>
+                    
+                    <a href="#" class="menu-item" onclick="startLiveRecording()">
+                        <i class="fas fa-record-vinyl w-5 text-red-500"></i>
+                        <span class="ml-3">Live Recording</span>
+                        <span class="ml-auto w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+                    </a>
+                    
+                    <a href="#" class="menu-item" onclick="showUploadRecording()">
+                        <i class="fas fa-upload w-5"></i>
+                        <span class="ml-3">Upload Recording</span>
+                    </a>
+                    
+                    <a href="#" class="menu-item" onclick="showMeetingChat()">
+                        <i class="fas fa-comments w-5"></i>
+                        <span class="ml-3">Ask Meeting AI</span>
+                        <span class="ml-auto bg-gradient-to-r from-purple-500 to-indigo-500 text-white text-xs px-2 py-1 rounded-full">Chat</span>
+                    </a>
+                    
+                    <a href="#" class="menu-item" onclick="showActionItems()">
+                        <i class="fas fa-tasks w-5"></i>
+                        <span class="ml-3">Action Items</span>
+                        <span class="ml-auto bg-orange-100 text-orange-600 text-xs px-2 py-1 rounded-full">7</span>
+                    </a>
+                </div>
+
+                <!-- Tools & Analytics -->
+                <div class="px-4 mb-6">
+                    <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-3">
+                        Tools & Analytics
+                    </div>
+                    
+                    <a href="#" class="menu-item" onclick="showAnalytics()">
+                        <i class="fas fa-chart-bar w-5"></i>
+                        <span class="ml-3">Analytics</span>
+                    </a>
+                    
+                    <a href="#" class="menu-item" onclick="showIntegrations()">
+                        <i class="fas fa-plug w-5"></i>
+                        <span class="ml-3">Integrations</span>
+                    </a>
+                    
+                    <a href="#" class="menu-item" onclick="showSettings()">
+                        <i class="fas fa-cog w-5"></i>
+                        <span class="ml-3">Settings</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- User Account Area -->
+            <div class="border-t border-gray-200 p-4">
+                <div class="flex items-center space-x-3 mb-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-purple-600 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold">
+                        โล่
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="font-semibold text-gray-900 truncate">โล่</div>
+                        <div class="text-sm text-gray-500 truncate">Team Leader</div>
+                    </div>
+                    <div class="status-indicator online">Online</div>
+                </div>
+                <button class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg py-2 px-3 text-sm font-medium hover:from-purple-700 hover:to-indigo-700 transition-all">
+                    <i class="fas fa-crown mr-2"></i>
+                    Upgrade to Pro
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- 📄 Smart Content Area -->
+    <main class="content-area" id="contentArea">
+        
+        <!-- 🎯 AI-First Dashboard -->
+        <div id="dashboardView" class="fade-in">
+            
+            <!-- 📊 Quick Overview Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <!-- Today's Priority -->
+                <div class="dashboard-widget priority-high">
+                    <div class="widget-header">
+                        <h3 class="widget-title">Today's Priority</h3>
+                        <i class="fas fa-exclamation-circle text-red-500"></i>
+                    </div>
+                    <div class="widget-value text-red-600">3</div>
+                    <p class="text-sm text-gray-600 mt-1">Urgent tasks pending</p>
+                    <div class="mt-3">
+                        <div class="text-xs text-red-600 font-medium">Budget Report Due: 2 hours</div>
+                    </div>
+                </div>
+
+                <!-- AI Usage Today -->
+                <div class="dashboard-widget">
+                    <div class="widget-header">
+                        <h3 class="widget-title">AI Usage</h3>
+                        <i class="fas fa-brain text-purple-500"></i>
+                    </div>
+                    <div class="widget-value">24</div>
+                    <p class="text-sm text-gray-600 mt-1">Queries today</p>
+                    <div class="mt-3 flex items-center space-x-2">
+                        <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span class="text-xs text-green-600">45 credits saved</span>
+                    </div>
+                </div>
+
+                <!-- Meeting Score -->
+                <div class="dashboard-widget">
+                    <div class="widget-header">
+                        <h3 class="widget-title">Meeting Efficiency</h3>
+                        <i class="fas fa-chart-line text-green-500"></i>
+                    </div>
+                    <div class="widget-value text-green-600">94%</div>
+                    <p class="text-sm text-gray-600 mt-1">This week average</p>
+                    <div class="mt-3">
+                        <div class="text-xs text-green-600 font-medium">↑ 12% vs last week</div>
+                    </div>
+                </div>
+
+                <!-- Team Activity -->
+                <div class="dashboard-widget">
+                    <div class="widget-header">
+                        <h3 class="widget-title">Team Activity</h3>
+                        <i class="fas fa-users text-blue-500"></i>
+                    </div>
+                    <div class="widget-value text-blue-600">8</div>
+                    <p class="text-sm text-gray-600 mt-1">Members online</p>
+                    <div class="mt-3 flex -space-x-1">
+                        <div class="w-6 h-6 bg-purple-500 rounded-full border-2 border-white"></div>
+                        <div class="w-6 h-6 bg-blue-500 rounded-full border-2 border-white"></div>
+                        <div class="w-6 h-6 bg-green-500 rounded-full border-2 border-white"></div>
+                        <div class="w-6 h-6 bg-yellow-500 rounded-full border-2 border-white flex items-center justify-center text-xs text-white">+4</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 🚀 AI Command Center -->
+            <div class="context-zone ai-active mb-8">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl font-bold text-gray-900 flex items-center">
+                        <i class="fas fa-rocket text-purple-600 mr-3"></i>
+                        AI Command Center
+                        <span class="ml-3 bg-purple-100 text-purple-600 text-xs px-3 py-1 rounded-full font-medium">All Models Ready</span>
+                    </h2>
+                    <div class="flex items-center space-x-2">
+                        <div class="status-indicator ai-processing">AI Active</div>
+                    </div>
+                </div>
+
+                <!-- Quick AI Actions -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="quick-action-card" onclick="openAIResearch()">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                                <i class="fas fa-search text-purple-600"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-gray-900">AI Research</h3>
+                                <p class="text-sm text-gray-600">Deep analysis & insights</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="quick-action-card" onclick="startMeetingAnalysis()">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                                <i class="fas fa-microphone text-blue-600"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-gray-900">Meeting Analysis</h3>
+                                <p class="text-sm text-gray-600">Record & transcribe</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="quick-action-card" onclick="openDocumentEditor()">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                                <i class="fas fa-edit text-green-600"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-gray-900">Smart Editor</h3>
+                                <p class="text-sm text-gray-600">AI-powered writing</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Model Performance -->
+                <div class="bg-white border border-gray-200 rounded-xl p-4">
+                    <h4 class="font-semibold text-gray-900 mb-3">AI Model Performance Today</h4>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-brain text-green-600 text-xs"></i>
+                                </div>
+                                <div>
+                                    <div class="font-medium text-sm">GPT-4 Turbo</div>
+                                    <div class="text-xs text-gray-500">12 queries • ฿0.96 spent</div>
+                                </div>
+                            </div>
+                            <div class="text-sm font-medium text-green-600">92% accuracy</div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-robot text-blue-600 text-xs"></i>
+                                </div>
+                                <div>
+                                    <div class="font-medium text-sm">Claude-3 Sonnet</div>
+                                    <div class="text-xs text-gray-500">8 queries • ฿0.40 spent</div>
+                                </div>
+                            </div>
+                            <div class="text-sm font-medium text-blue-600">89% accuracy</div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-gem text-purple-600 text-xs"></i>
+                                </div>
+                                <div>
+                                    <div class="font-medium text-sm">Gemini Pro</div>
+                                    <div class="text-xs text-gray-500">4 queries • ฿0.08 spent</div>
+                                </div>
+                            </div>
+                            <div class="text-sm font-medium text-purple-600">85% accuracy</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 📅 Today's Agenda -->
+            <div class="context-zone priority-medium mb-8">
+                <h2 class="text-xl font-bold text-gray-900 flex items-center mb-6">
+                    <i class="fas fa-calendar-day text-orange-500 mr-3"></i>
+                    Today's Agenda
+                    <span class="ml-3 bg-orange-100 text-orange-600 text-xs px-3 py-1 rounded-full font-medium">3 meetings</span>
+                </h2>
+
+                <div class="space-y-4">
+                    <!-- Upcoming Meeting -->
+                    <div class="bg-gradient-to-r from-red-50 to-red-100 border border-red-200 rounded-xl p-4">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
+                                    <i class="fas fa-video text-red-600"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-semibold text-red-900">Budget Review Meeting</h3>
+                                    <p class="text-sm text-red-700">With finance team • Room 301</p>
+                                    <p class="text-xs text-red-600 font-medium">เริ่มใน 15 นาที</p>
+                                </div>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button onclick="joinMeeting()" class="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-700 transition-colors">
+                                    <i class="fas fa-video mr-2"></i>Join
+                                </button>
+                                <button onclick="startPreRecord()" class="bg-white text-red-600 border border-red-600 px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-50 transition-colors">
+                                    <i class="fas fa-record-vinyl mr-2"></i>Record
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Other Meetings -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-users text-blue-600"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-medium text-blue-900">Team Standup</h3>
+                                    <p class="text-sm text-blue-700">15:00 - 15:30</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-green-50 border border-green-200 rounded-xl p-4">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-handshake text-green-600"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-medium text-green-900">Client Meeting</h3>
+                                    <p class="text-sm text-green-700">16:30 - 17:30</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 📈 Recent Activity & Quick Access -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Recent Research -->
+                <div class="context-zone">
+                    <h2 class="text-lg font-bold text-gray-900 flex items-center mb-4">
+                        <i class="fas fa-history text-gray-600 mr-3"></i>
+                        Recent Research
+                    </h2>
+                    
+                    <div class="space-y-3">
+                        <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
+                            <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-file-alt text-purple-600 text-xs"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="font-medium text-gray-900 text-sm">รายงานงบประมาณ Q1</div>
+                                <div class="text-xs text-gray-500">2 ชั่วโมงที่แล้ว • GPT-4 • 25 credits</div>
+                            </div>
+                            <button class="text-gray-400 hover:text-gray-600">
+                                <i class="fas fa-external-link-alt text-xs"></i>
+                            </button>
+                        </div>
+
+                        <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
+                            <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-chart-bar text-green-600 text-xs"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="font-medium text-gray-900 text-sm">ข้อมูลการใช้งานระบบ</div>
+                                <div class="text-xs text-gray-500">5 ชั่วโมงที่แล้ว • Claude-3 • 15 credits</div>
+                            </div>
+                            <button class="text-gray-400 hover:text-gray-600">
+                                <i class="fas fa-external-link-alt text-xs"></i>
+                            </button>
+                        </div>
+
+                        <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
+                            <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-gavel text-blue-600 text-xs"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="font-medium text-gray-900 text-sm">กฎหมายแรงงาน 2567</div>
+                                <div class="text-xs text-gray-500">1 วันที่แล้ว • Gemini • 8 credits</div>
+                            </div>
+                            <button class="text-gray-400 hover:text-gray-600">
+                                <i class="fas fa-external-link-alt text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Suggested Actions -->
+                <div class="context-zone">
+                    <h2 class="text-lg font-bold text-gray-900 flex items-center mb-4">
+                        <i class="fas fa-lightbulb text-yellow-500 mr-3"></i>
+                        AI Suggestions
+                    </h2>
+                    
+                    <div class="space-y-3">
+                        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                            <div class="flex items-start space-x-3">
+                                <div class="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-exclamation text-yellow-600 text-xs"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-medium text-yellow-900 text-sm">Prepare for Budget Meeting</h3>
+                                    <p class="text-xs text-yellow-700 mt-1">AI suggests reviewing Q3 expenses and preparing cost analysis</p>
+                                    <button class="text-xs text-yellow-600 font-medium mt-2 hover:text-yellow-800">
+                                        Start Research →
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                            <div class="flex items-start space-x-3">
+                                <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-sync text-blue-600 text-xs"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-medium text-blue-900 text-sm">Update Team Documents</h3>
+                                    <p class="text-xs text-blue-700 mt-1">3 documents need updates based on recent meeting decisions</p>
+                                    <button class="text-xs text-blue-600 font-medium mt-2 hover:text-blue-800">
+                                        Review Documents →
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-3">
+                            <div class="flex items-start space-x-3">
+                                <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-award text-green-600 text-xs"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-medium text-green-900 text-sm">Efficiency Achievement</h3>
+                                    <p class="text-xs text-green-700 mt-1">You've saved 2.5 hours this week using AI automation</p>
+                                    <button class="text-xs text-green-600 font-medium mt-2 hover:text-green-800">
+                                        View Report →
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 🔍 AI Research View (Hidden by default) -->
+        <div id="aiResearchView" class="hidden fade-in">
+            <div class="context-zone ai-active">
+                <div class="flex items-center justify-between mb-6">
+                    <h1 class="text-2xl font-bold text-gray-900 flex items-center">
+                        <button onclick="showDashboard()" class="mr-4 p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                            <i class="fas fa-arrow-left text-gray-600"></i>
+                        </button>
+                        <i class="fas fa-brain text-purple-600 mr-3"></i>
+                        AI Research Intelligence
+                        <span class="ml-3 bg-purple-100 text-purple-600 text-xs px-3 py-1 rounded-full font-medium">Multi-Model</span>
+                    </h1>
+                </div>
+
+                <!-- Enhanced Search Interface -->
+                <div class="mb-8">
+                    <div class="relative">
+                        <textarea 
+                            id="researchQuery"
+                            placeholder="Ask me anything... เช่น 'ขั้นตอนการขอจดทะเบียนธุรกิจใหม่ตามกฎหมายไทย' หรือ 'วิเคราะห์งบประมาณของหน่วยงาน'"
+                            class="search-enhanced w-full h-24 p-4 resize-none focus:outline-none"
+                            onkeydown="handleResearchKeydown(event)"></textarea>
+                        
+                        <div class="absolute bottom-4 right-4 flex items-center space-x-3">
+                            <div class="flex items-center space-x-2 text-sm text-gray-500">
+                                <span>Model:</span>
+                                <span id="currentModelDisplay" class="font-medium text-purple-600">GPT-4</span>
+                            </div>
+                            <button class="p-2 text-gray-400 hover:text-purple-600 transition-colors">
+                                <i class="fas fa-microphone"></i>
+                            </button>
+                            <button class="p-2 text-gray-400 hover:text-purple-600 transition-colors">
+                                <i class="fas fa-paperclip"></i>
+                            </button>
+                            <button onclick="performAIResearch()" class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-6 py-2 rounded-lg font-medium hover:from-purple-700 hover:to-indigo-700 transition-all">
+                                <i class="fas fa-paper-plane mr-2"></i>Research
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Research Filters -->
+                <div class="mb-6">
+                    <div class="text-sm text-gray-600 mb-3 flex items-center">
+                        <i class="fas fa-filter mr-2"></i>Research Focus:
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <button class="px-4 py-2 bg-purple-100 text-purple-700 rounded-full text-sm font-medium hover:bg-purple-200 transition-colors">
+                            <i class="fas fa-university mr-1"></i>Government
+                        </button>
+                        <button class="px-4 py-2 bg-gray-100 text-gray-700 rounded-full text-sm hover:bg-purple-100 hover:text-purple-700 transition-colors">
+                            <i class="fas fa-graduation-cap mr-1"></i>Academic
+                        </button>
+                        <button class="px-4 py-2 bg-gray-100 text-gray-700 rounded-full text-sm hover:bg-purple-100 hover:text-purple-700 transition-colors">
+                            <i class="fas fa-newspaper mr-1"></i>News
+                        </button>
+                        <button class="px-4 py-2 bg-gray-100 text-gray-700 rounded-full text-sm hover:bg-purple-100 hover:text-purple-700 transition-colors">
+                            <i class="fas fa-flag mr-1"></i>Thai Only
+                        </button>
+                        <button class="px-4 py-2 bg-gray-100 text-gray-700 rounded-full text-sm hover:bg-purple-100 hover:text-purple-700 transition-colors">
+                            <i class="fas fa-comments mr-1"></i>Meeting Knowledge
+                        </button>
+                    </div>
+                </div>
+
+                <!-- AI Response Area -->
+                <div id="aiResponseArea" class="hidden">
+                    <div class="ai-response">
+                        <div class="flex items-start space-x-4">
+                            <div class="w-12 h-12 bg-gradient-to-br from-purple-600 to-indigo-600 rounded-full flex items-center justify-center text-white flex-shrink-0">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="text-gray-900 leading-relaxed" id="aiResponseText"></div>
+                                <div class="mt-4 flex flex-wrap gap-2" id="aiSources"></div>
+                                <div class="mt-6 pt-4 border-t border-purple-200">
+                                    <div class="flex flex-wrap gap-2">
+                                        <button onclick="exportToGoogleDocs()" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
+                                            <i class="fab fa-google-drive mr-2"></i>Export to Google Docs
+                                        </button>
+                                        <button onclick="exportToWord()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors">
+                                            <i class="fab fa-microsoft mr-2"></i>Export to Word
+                                        </button>
+                                        <button onclick="shareWithTeam()" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors">
+                                            <i class="fas fa-share-alt mr-2"></i>Share with Team
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Follow-up Questions -->
+                    <div class="bg-gray-50 rounded-xl p-4 mt-6">
+                        <div class="text-sm text-gray-600 mb-3 flex items-center">
+                            <i class="fas fa-lightbulb mr-2"></i>Follow-up Questions:
+                        </div>
+                        <div class="space-y-2" id="followUpQuestions"></div>
+                    </div>
+                </div>
+
+                <!-- Suggested Research for Government Officials -->
+                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6">
+                    <h3 class="text-lg font-semibold text-blue-900 mb-4 flex items-center">
+                        <i class="fas fa-lightbulb text-blue-600 mr-3"></i>
+                        Popular Research Topics for Government Officials
+                    </h3>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div class="bg-white border border-blue-200 rounded-lg p-4 hover:border-blue-300 hover:shadow-md cursor-pointer transition-all" onclick="suggestedResearch('การขอจดทะเบียนธุรกิจใหม่')">
+                            <div class="font-medium text-blue-900">การขอจดทะเบียนธุรกิจใหม่</div>
+                            <div class="text-sm text-blue-700 mt-1">ขั้นตอนและเอกสารที่จำเป็น</div>
+                        </div>
+                        <div class="bg-white border border-blue-200 rounded-lg p-4 hover:border-blue-300 hover:shadow-md cursor-pointer transition-all" onclick="suggestedResearch('กฎหมายแรงงาน 2567')">
+                            <div class="font-medium text-blue-900">กฎหมายแรงงาน 2567</div>
+                            <div class="text-sm text-blue-700 mt-1">การปรับปรุงล่าสุด</div>
+                        </div>
+                        <div class="bg-white border border-blue-200 rounded-lg p-4 hover:border-blue-300 hover:shadow-md cursor-pointer transition-all" onclick="suggestedResearch('ระเบียบการเบิกค่าใช้จ่าย')">
+                            <div class="font-medium text-blue-900">ระเบียบการเบิกค่าใช้จ่าย</div>
+                            <div class="text-sm text-blue-700 mt-1">หลักเกณฑ์และแนวปฏิบัติ</div>
+                        </div>
+                        <div class="bg-white border border-blue-200 rounded-lg p-4 hover:border-blue-300 hover:shadow-md cursor-pointer transition-all" onclick="suggestedResearch('นโยบายรัฐบาลดิจิทัล')">
+                            <div class="font-medium text-blue-900">นโยบายรัฐบาลดิจิทัล</div>
+                            <div class="text-sm text-blue-700 mt-1">แผนพัฒนาประเทศ</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 🎙️ Live Recording View (Hidden by default) -->
+        <div id="liveRecordingView" class="hidden fade-in">
+            <div class="context-zone priority-high">
+                <div class="flex items-center justify-between mb-6">
+                    <h1 class="text-2xl font-bold text-gray-900 flex items-center">
+                        <button onclick="showDashboard()" class="mr-4 p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                            <i class="fas fa-arrow-left text-gray-600"></i>
+                        </button>
+                        <i class="fas fa-record-vinyl text-red-500 mr-3 animate-pulse"></i>
+                        Live Recording in Progress
+                    </h1>
+                    <button onclick="stopLiveRecording()" class="bg-red-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-red-700 transition-colors">
+                        <i class="fas fa-stop mr-2"></i>Stop Recording
+                    </button>
+                </div>
+                
+                <div class="bg-red-50 border border-red-200 rounded-xl p-6">
+                    <div class="grid md:grid-cols-3 gap-6 text-sm">
+                        <div class="text-center">
+                            <div class="text-red-600 font-medium mb-1">Duration:</div>
+                            <div id="recordingTimer" class="text-2xl font-mono text-red-900 font-bold">00:00</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-red-600 font-medium mb-1">Participants:</div>
+                            <div class="text-2xl font-bold text-red-900">3</div>
+                            <div class="text-xs text-red-600">detected</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-red-600 font-medium mb-1">Language:</div>
+                            <div class="text-lg font-semibold text-red-900">Thai/English</div>
+                            <div class="text-xs text-red-600">auto-detect</div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 p-4 bg-white rounded-lg border">
+                        <div class="text-sm font-medium text-red-700 mb-3 flex items-center">
+                            <i class="fas fa-waveform-lines mr-2"></i>Real-time Transcription:
+                        </div>
+                        <div id="liveTranscript" class="text-gray-800 min-h-24 max-h-40 overflow-y-auto text-sm bg-gray-50 p-3 rounded border">
+                            <div class="text-gray-400 italic flex items-center">
+                                <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-red-500 mr-2"></div>
+                                Listening for speech...
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Real-time AI Insights -->
+                    <div class="mt-6 bg-purple-50 border border-purple-200 rounded-lg p-4">
+                        <div class="text-sm font-medium text-purple-700 mb-3 flex items-center">
+                            <i class="fas fa-brain mr-2"></i>AI Real-time Insights:
+                        </div>
+                        <div id="realTimeInsights" class="space-y-2">
+                            <div class="text-sm text-purple-600">• Detecting key topics and decisions...</div>
+                            <div class="text-sm text-purple-600">• Identifying action items automatically...</div>
+                            <div class="text-sm text-purple-600">• Monitoring meeting efficiency...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- 🎯 Enhanced Right Panel - Real-time Collaboration Hub -->
+    <aside class="right-panel" id="rightPanel">
+        
+        <!-- Team Status - Enhanced -->
+        <div class="p-6 border-b border-gray-200">
+            <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Team Status</h3>
+            <div class="space-y-3">
+                <div class="flex items-center space-x-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+                    <div class="relative">
+                        <div class="w-10 h-10 bg-gradient-to-br from-purple-600 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold">
+                            โล่
+                        </div>
+                        <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-green-400 border-2 border-white rounded-full"></div>
+                    </div>
+                    <div class="flex-1">
+                        <div class="font-semibold text-gray-900">โล่ (You)</div>
+                        <div class="text-sm text-green-600 flex items-center">
+                            <i class="fas fa-circle text-xs mr-1"></i>Online • Leading meeting
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div class="relative">
+                        <div class="w-10 h-10 bg-gradient-to-br from-gray-500 to-gray-600 rounded-full flex items-center justify-center text-white font-semibold">
+                            เอ
+                        </div>
+                        <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-blue-400 border-2 border-white rounded-full"></div>
+                    </div>
+                    <div class="flex-1">
+                        <div class="font-semibold text-gray-900">เอ</div>
+                        <div class="text-sm text-blue-600 flex items-center">
+                            <i class="fas fa-video text-xs mr-1"></i>In meeting
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <div class="relative">
+                        <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-semibold">
+                            บี
+                        </div>
+                        <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-yellow-400 border-2 border-white rounded-full"></div>
+                    </div>
+                    <div class="flex-1">
+                        <div class="font-semibold text-gray-900">บี</div>
+                        <div class="text-sm text-yellow-600 flex items-center">
+                            <i class="fas fa-coffee text-xs mr-1"></i>Away • Back in 10 min
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-3 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                    <div class="relative">
+                        <div class="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center text-white font-semibold">
+                            ซี
+                        </div>
+                        <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-gray-400 border-2 border-white rounded-full"></div>
+                    </div>
+                    <div class="flex-1">
+                        <div class="font-semibold text-gray-900">ซี</div>
+                        <div class="text-sm text-gray-500 flex items-center">
+                            <i class="fas fa-moon text-xs mr-1"></i>Offline
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Insights Panel -->
+        <div class="p-6 border-b border-gray-200">
+            <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">AI Insights</h3>
+            <div class="space-y-4">
+                <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm font-medium text-purple-900">Today's AI Usage</span>
+                        <i class="fas fa-brain text-purple-600"></i>
+                    </div>
+                    <div class="text-2xl font-bold text-purple-600">24</div>
+                    <div class="text-xs text-purple-700">queries • ฿1.44 spent</div>
+                    <div class="mt-2 bg-purple-200 rounded-full h-2">
+                        <div class="bg-purple-600 h-2 rounded-full" style="width: 60%"></div>
+                    </div>
+                </div>
+                
+                <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm font-medium text-green-900">Meeting Efficiency</span>
+                        <i class="fas fa-chart-line text-green-600"></i>
+                    </div>
+                    <div class="text-2xl font-bold text-green-600">94%</div>
+                    <div class="text-xs text-green-700">this week average</div>
+                    <div class="text-xs text-green-600 mt-1">↑ 12% improvement</div>
+                </div>
+                
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm font-medium text-yellow-900">Credits Remaining</span>
+                        <i class="fas fa-coins text-yellow-600"></i>
+                    </div>
+                    <div class="text-2xl font-bold text-yellow-600">1,246</div>
+                    <div class="text-xs text-yellow-700">~52 hours of usage</div>
+                    <div class="text-xs text-yellow-600 mt-1">Renews in 8 days</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="p-6 border-b border-gray-200">
+            <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Quick Actions</h3>
+            <div class="space-y-2">
+                <button onclick="openDocumentEditor()" class="w-full text-left p-3 bg-white border border-gray-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 transition-all">
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-file-plus text-purple-600"></i>
+                        <span class="font-medium text-gray-900">New Document</span>
+                    </div>
+                </button>
+                
+                <button onclick="inviteTeamMember()" class="w-full text-left p-3 bg-white border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-all">
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-user-plus text-blue-600"></i>
+                        <span class="font-medium text-gray-900">Invite Team Member</span>
+                    </div>
+                </button>
+                
+                <button onclick="startLiveRecording()" class="w-full text-left p-3 bg-white border border-gray-200 rounded-lg hover:border-red-300 hover:bg-red-50 transition-all">
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-record-vinyl text-red-600"></i>
+                        <span class="font-medium text-gray-900">Start Recording</span>
+                        <span class="ml-auto bg-red-100 text-red-600 text-xs px-2 py-1 rounded-full">Live</span>
+                    </div>
+                </button>
+                
+                <button onclick="openMeetingChat()" class="w-full text-left p-3 bg-white border border-gray-200 rounded-lg hover:border-indigo-300 hover:bg-indigo-50 transition-all">
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-comments text-indigo-600"></i>
+                        <span class="font-medium text-gray-900">Ask Meeting AI</span>
+                        <span class="ml-auto bg-indigo-100 text-indigo-600 text-xs px-2 py-1 rounded-full">Chat</span>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+        <!-- Upcoming Events -->
+        <div class="p-6 border-b border-gray-200">
+            <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Upcoming</h3>
+            <div class="space-y-3">
+                <div class="bg-red-50 border border-red-200 rounded-lg p-3">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-video text-red-600 text-xs"></i>
+                        </div>
+                        <div class="flex-1">
+                            <div class="text-sm font-medium text-red-900">Budget Review</div>
+                            <div class="text-xs text-red-700">เริ่มใน 15 นาที</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-users text-blue-600 text-xs"></i>
+                        </div>
+                        <div class="flex-1">
+                            <div class="text-sm font-medium text-blue-900">Team Standup</div>
+                            <div class="text-xs text-blue-700">Today, 15:00</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-green-50 border border-green-200 rounded-lg p-3">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-handshake text-green-600 text-xs"></i>
+                        </div>
+                        <div class="flex-1">
+                            <div class="text-sm font-medium text-green-900">Client Meeting</div>
+                            <div class="text-xs text-green-700">Friday, 14:00</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Files -->
+        <div class="p-6 border-b border-gray-200">
+            <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Recent Files</h3>
+            <div class="space-y-3">
+                <div class="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors">
+                    <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-file-alt text-purple-600 text-xs"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="text-sm font-medium text-gray-900 truncate">Meeting Minutes Q4</div>
+                        <div class="text-xs text-gray-500">2 hours ago</div>
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors">
+                    <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-chart-bar text-green-600 text-xs"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="text-sm font-medium text-gray-900 truncate">Budget Analysis</div>
+                        <div class="text-xs text-gray-500">Yesterday</div>
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors">
+                    <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-microphone text-blue-600 text-xs"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="text-sm font-medium text-gray-900 truncate">Team Meeting Audio</div>
+                        <div class="text-xs text-gray-500">3 days ago</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Info -->
+        <div class="p-6">
+            <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Quick Info</h3>
+            <div class="space-y-3">
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <div class="text-sm font-medium text-blue-900">Bangkok</div>
+                            <div class="text-xs text-blue-700">Partly Cloudy</div>
+                        </div>
+                        <div class="text-lg font-bold text-blue-900">28°C</div>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <div class="text-sm font-medium text-gray-900">Local Time</div>
+                            <div class="text-xs text-gray-600">Bangkok, Thailand</div>
+                        </div>
+                        <div id="currentTime" class="text-lg font-bold text-gray-900 font-mono">14:32</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </aside>
+</div>
+
+<script>
+    // 🚀 Enhanced FlowWork JavaScript - AI-First Platform
+
+    // State Management
+    let currentView = 'dashboard';
+    let isRecording = false;
+    let recordingTimer = 0;
+    let recordingInterval;
+    let sidebarCollapsed = false;
+    let selectedAIModel = 'GPT-4';
+    let aiModelDropdownOpen = false;
+
+    // AI Models Configuration
+    const aiModels = {
+        'GPT-4': { name: 'GPT-4 Turbo', price: '฿0.08/query', description: 'Complex reasoning', icon: 'fas fa-brain', color: 'green' },
+        'Claude-3': { name: 'Claude-3 Sonnet', price: '฿0.05/query', description: 'Balanced performance', icon: 'fas fa-robot', color: 'blue' },
+        'Gemini': { name: 'Gemini Pro', price: '฿0.02/query', description: 'Cost effective', icon: 'fas fa-gem', color: 'purple' }
+    };
+
+    // Enhanced AI Responses
+    const aiResponses = {
+        'การขอจดทะเบียนธุรกิจใหม่': {
+            text: `การจดทะเบียนธุรกิจใหม่ในประเทศไทยมีขั้นตอนหลักดังนี้:
+
+**1. การเตรียมเอกสาร**
+- หนังสือรับรองบริษัท (ถ้าเป็นนิติบุคคล)
+- บัตรประชาชนผู้มีอำนาจลงนาม
+- หนังสือมอบอำนาจ (ถ้ามี)
+
+**2. การยื่นคำขอ**
+- ยื่นคำขอที่กรมพัฒนาธุรกิจการค้า
+- ชำระค่าธรรมเนียม 500-1,000 บาท
+- ระยะเวลาดำเนินการ 1-3 วันทำการ
+
+**3. การรับใบทะเบียน**
+- รับใบทะเบียนการค้า
+- ต้องต่ออายุทุก 5 ปี
+
+💡 **AI Insight**: ระบบแนะนำให้ใช้บริการออนไลน์ผ่าน DBD e-Service เพื่อประหยัดเวลา`,
+            sources: [
+                { title: "กรมพัฒนาธุรกิจการค้า", url: "dbd.go.th", confidence: "high", type: "official" },
+                { title: "คู่มือการจดทะเบียน 2567", url: "gov.th", confidence: "high", type: "document" }
+            ],
+            followUp: [
+                "ค่าธรรมเนียมการจดทะเบียนแต่ละประเภทธุรกิจ",
+                "เอกสารเพิ่มเติมสำหรับธุรกิจต่างชาติ",
+                "ขั้นตอนการต่ออายุใบทะเบียนการค้า"
+            ]
+        }
+    };
+
+    // 🎯 Navigation Functions
+    function showDashboard() {
+        hideAllViews();
+        document.getElementById('dashboardView').classList.remove('hidden');
+        currentView = 'dashboard';
+        updateActiveMenu('dashboard');
+    }
+
+    function showAIResearch() {
+        hideAllViews();
+        document.getElementById('aiResearchView').classList.remove('hidden');
+        currentView = 'aiResearch';
+        updateActiveMenu('aiResearch');
+        setTimeout(() => document.getElementById('researchQuery').focus(), 300);
+    }
+
+    function startLiveRecording() {
+        if (isRecording) return;
+        
+        hideAllViews();
+        document.getElementById('liveRecordingView').classList.remove('hidden');
+        currentView = 'liveRecording';
+        updateActiveMenu('liveRecording');
+        
+        isRecording = true;
+        recordingTimer = 0;
+        
+        recordingInterval = setInterval(() => {
+            recordingTimer++;
+            const minutes = Math.floor(recordingTimer / 60);
+            const seconds = recordingTimer % 60;
+            const timeString = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            const timerElement = document.getElementById('recordingTimer');
+            if (timerElement) {
+                timerElement.textContent = timeString;
+            }
+            
+            // Simulate live transcription
+            if (recordingTimer % 8 === 0) {
+                simulateLiveTranscription();
+            }
+            
+            // Simulate AI insights
+            if (recordingTimer % 15 === 0) {
+                updateRealTimeInsights();
+            }
+        }, 1000);
+        
+        showNotification('Live recording started! AI is processing in real-time.', 'success');
+    }
+
+    function stopLiveRecording() {
+        if (!isRecording) return;
+        
+        isRecording = false;
+        clearInterval(recordingInterval);
+        
+        showNotification('Recording stopped. Processing meeting summary...', 'info');
+        
+        // Return to dashboard after processing
+        setTimeout(() => {
+            showDashboard();
+            showNotification('Meeting summary ready! Check your documents.', 'success');
+        }, 3000);
+    }
+
+    function hideAllViews() {
+        const views = ['dashboardView', 'aiResearchView', 'liveRecordingView'];
+        views.forEach(view => {
+            const element = document.getElementById(view);
+            if (element) {
+                element.classList.add('hidden');
+            }
+        });
+    }
+
+    function updateActiveMenu(activeView) {
+        document.querySelectorAll('.menu-item').forEach(item => {
+            item.classList.remove('active');
+        });
+        
+        // Add active class based on view
+        const menuMap = {
+            'dashboard': 0,
+            'aiResearch': 1,
+            'liveRecording': 4 // Live Recording menu item index
+        };
+        
+        const menuItems = document.querySelectorAll('.menu-item');
+        if (menuMap[activeView] !== undefined && menuItems[menuMap[activeView]]) {
+            menuItems[menuMap[activeView]].classList.add('active');
+        }
+    }
+
+    // 🤖 AI Model Functions
+    function toggleAIModelDropdown() {
+        const dropdown = document.getElementById('aiModelDropdown');
+        const selector = document.querySelector('.ai-model-selector');
+        
+        aiModelDropdownOpen = !aiModelDropdownOpen;
+        
+        if (aiModelDropdownOpen) {
+            dropdown.classList.add('show');
+            selector.classList.add('active');
+        } else {
+            dropdown.classList.remove('show');
+            selector.classList.remove('active');
+        }
+    }
+
+    function selectAIModel(model, price, description) {
+        selectedAIModel = model;
+        
+        document.getElementById('selectedModel').textContent = model;
+        document.getElementById('selectedPrice').textContent = price;
+        document.getElementById('currentModelDisplay').textContent = model;
+        
+        // Update selected state
+        document.querySelectorAll('.ai-model-option').forEach(option => {
+            option.classList.remove('selected');
+        });
+           event.currentTarget.classList.add('selected');
+           
+           toggleAIModelDropdown();
+           showNotification(`Switched to ${model} - ${description}`, 'info');
+       }
+
+       // 🔍 Search and Research Functions
+       function handleGlobalSearch(event) {
+           if (event.key === 'Enter' && !event.shiftKey) {
+               event.preventDefault();
+               const query = event.target.value.trim();
+               if (query) {
+                   performQuickAISearch(query);
+               }
+           }
+       }
+
+       function handleResearchKeydown(event) {
+           if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+               event.preventDefault();
+               performAIResearch();
+           }
+       }
+
+       function performQuickAISearch(query) {
+           showNotification(`Searching with ${selectedAIModel}: "${query}"`, 'info');
+           // Quick AI search from header
+           if (currentView !== 'aiResearch') {
+               showAIResearch();
+           }
+           document.getElementById('researchQuery').value = query;
+           setTimeout(() => performAIResearch(), 500);
+       }
+
+       function performAIResearch() {
+           const query = document.getElementById('researchQuery').value.trim();
+           if (!query) {
+               showNotification('Please enter a research query', 'warning');
+               return;
+           }
+
+           const responseArea = document.getElementById('aiResponseArea');
+           const responseText = document.getElementById('aiResponseText');
+           const sources = document.getElementById('aiSources');
+           const followUpQuestions = document.getElementById('followUpQuestions');
+
+           responseArea.classList.remove('hidden');
+           responseText.innerHTML = `
+               <div class="flex items-center space-x-3">
+                   <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-purple-600"></div>
+                   <span class="text-gray-600">Analyzing with ${selectedAIModel}...</span>
+               </div>
+           `;
+
+           // Show processing steps
+           const steps = [
+               'Searching multiple sources...',
+               'Processing with AI model...',
+               'Generating insights...',
+               'Finalizing response...'
+           ];
+
+           let stepIndex = 0;
+           const stepInterval = setInterval(() => {
+               if (stepIndex < steps.length) {
+                   responseText.innerHTML = `
+                       <div class="flex items-center space-x-3">
+                           <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-purple-600"></div>
+                           <span class="text-gray-600">${steps[stepIndex]}</span>
+                       </div>
+                   `;
+                   stepIndex++;
+               } else {
+                   clearInterval(stepInterval);
+                   displayAIResponse(query);
+               }
+           }, 800);
+       }
+
+       function displayAIResponse(query) {
+           const responseText = document.getElementById('aiResponseText');
+           const sources = document.getElementById('aiSources');
+           const followUpQuestions = document.getElementById('followUpQuestions');
+
+           const response = aiResponses[query] || {
+               text: `ผลการค้นหาจากระบบ AI สำหรับ "${query}":
+
+เนื่องจากเป็น demo version ข้อมูลจริงจะมาจากการเชื่อมต่อกับ AI models และแหล่งข้อมูลต่างๆ รวมถึง:
+
+- **หน่วยงานราชการ**: เอกสารจากกระทรวงต่างๆ
+- **ฐานข้อมูลกฎหมาย**: ระเบียบและประกาศต่างๆ
+- **ประวัติการประชุม**: ข้อมูลจากการประชุมที่ผ่านมา
+
+ระบบจะให้คำตอบที่ตรงประเด็น พร้อม citation และ follow-up questions`,
+               sources: [
+                   { title: "FlowWork Demo System", url: "demo.flow.in.th", confidence: "demo", type: "system" },
+                   { title: `AI Model: ${selectedAIModel}`, url: "internal", confidence: "high", type: "ai" }
+               ],
+               followUp: [
+                   "การขอจดทะเบียนธุรกิจใหม่",
+                   "กฎหมายแรงงาน 2567",
+                   "ระเบียบการเบิกค่าใช้จ่าย"
+               ]
+           };
+
+           // Type writer effect
+           typeWriterEffect(responseText, response.text, 25);
+
+           // Display sources
+           sources.innerHTML = response.sources.map(source => 
+               `<div class="inline-flex items-center space-x-2 px-3 py-2 bg-white border border-gray-200 rounded-lg text-xs">
+                   <div class="w-2 h-2 rounded-full ${getConfidenceColor(source.confidence)}"></div>
+                   <span class="font-medium">${source.title}</span>
+                   <span class="text-gray-500">${source.type}</span>
+               </div>`
+           ).join('');
+
+           // Display follow-up questions
+           followUpQuestions.innerHTML = response.followUp.map(question =>
+               `<button onclick="suggestedResearch('${question}')" class="block w-full text-left px-4 py-3 bg-white border border-gray-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 text-sm transition-all">
+                   <i class="fas fa-arrow-right text-purple-500 mr-2"></i>${question}
+               </button>`
+           ).join('');
+
+           // Scroll to response
+           document.getElementById('aiResponseArea').scrollIntoView({ behavior: 'smooth' });
+
+           // Update usage stats
+           updateAIUsageStats();
+       }
+
+       function suggestedResearch(query) {
+           document.getElementById('researchQuery').value = query;
+           performAIResearch();
+       }
+
+       function typeWriterEffect(element, text, speed) {
+           element.innerHTML = '';
+           let i = 0;
+           
+           function type() {
+               if (i < text.length) {
+                   element.innerHTML += text.charAt(i);
+                   i++;
+                   setTimeout(type, speed);
+               }
+           }
+           type();
+       }
+
+       function getConfidenceColor(confidence) {
+           const colors = {
+               'high': 'bg-green-500',
+               'medium': 'bg-yellow-500',
+               'low': 'bg-red-500',
+               'demo': 'bg-purple-500',
+               'ai': 'bg-blue-500'
+           };
+           return colors[confidence] || 'bg-gray-500';
+       }
+
+       // 🎙️ Meeting Functions
+       function simulateLiveTranscription() {
+           const transcriptions = [
+               "ครับ เรามาเริ่มการประชุมกันครับ วันนี้เราจะพูดถึงความคืบหน้าของโครงการ FlowWork",
+               "ตอนนี้ผลงานด้านเทคนิคเป็นอย่างไร มีปัญหาอะไรที่ต้องแก้ไขมั้ยครับ",
+               "สำหรับเรื่องงบประมาณ เราควรจะปรับแผนการใช้จ่ายใหม่ให้เหมาะสม",
+               "ผมคิดว่าเราควรจะกำหนดประชุมครั้งถัดไปในสัปดาห์หน้าครับ",
+               "มีใครมีข้อสงสัยเพิ่มเติมเกี่ยวกับแผนงานนี้มั้ยครับ"
+           ];
+           
+           const transcript = transcriptions[Math.floor(Math.random() * transcriptions.length)];
+           const transcriptDiv = document.getElementById('liveTranscript');
+           
+           if (transcriptDiv) {
+               // Clear loading message
+               if (transcriptDiv.querySelector('.text-gray-400')) {
+                   transcriptDiv.innerHTML = '';
+               }
+               
+               const newLine = document.createElement('div');
+               newLine.className = 'border-l-4 border-purple-500 pl-3 mb-3 pb-2';
+               newLine.innerHTML = `
+                   <div class="flex items-center justify-between mb-1">
+                       <span class="text-xs font-medium text-purple-600">[${new Date().toLocaleTimeString()}]</span>
+                       <span class="text-xs text-gray-500">Speaker 1</span>
+                   </div>
+                   <div class="text-gray-800">${transcript}</div>
+               `;
+               
+               transcriptDiv.appendChild(newLine);
+               transcriptDiv.scrollTop = transcriptDiv.scrollHeight;
+           }
+       }
+
+       function updateRealTimeInsights() {
+           const insights = [
+               "• พบการตัดสินใจ 2 เรื่อง: งบประมาณและกำหนดการ",
+               "• ตรวจพบ Action Item: กำหนดประชุมครั้งถัดไป",
+               "• คะแนนประสิทธิภาพการประชุม: 88% (ดีเยี่ยม)",
+               "• ระยะเวลาการพูดสมดุล: ผู้เข้าร่วมทุกคนมีส่วนร่วม",
+               "• หัวข้อหลัก: โครงการ FlowWork, งบประมาณ, แผนงาน"
+           ];
+           
+           const insightsDiv = document.getElementById('realTimeInsights');
+           if (insightsDiv) {
+               const randomInsight = insights[Math.floor(Math.random() * insights.length)];
+               
+               const newInsight = document.createElement('div');
+               newInsight.className = 'text-sm text-purple-600 fade-in';
+               newInsight.textContent = randomInsight;
+               
+               insightsDiv.appendChild(newInsight);
+               
+               // Keep only last 5 insights
+               while (insightsDiv.children.length > 5) {
+                   insightsDiv.removeChild(insightsDiv.firstChild);
+               }
+           }
+       }
+
+       // 📤 Export Functions
+       function exportToGoogleDocs() {
+           showNotification('Exporting to Google Docs... This will open in a new tab.', 'success');
+           // Simulate Google Docs API integration
+           setTimeout(() => {
+               showNotification('Document exported successfully to Google Docs!', 'success');
+           }, 2000);
+       }
+
+       function exportToWord() {
+           showNotification('Generating Word document... Download will start shortly.', 'success');
+           // Simulate Word export
+           setTimeout(() => {
+               showNotification('Word document downloaded successfully!', 'success');
+           }, 2000);
+       }
+
+       function shareWithTeam() {
+           showNotification('Sharing with team members... Notifications sent!', 'success');
+           // Simulate team sharing
+           setTimeout(() => {
+               showNotification('Document shared with 8 team members!', 'success');
+           }, 1500);
+       }
+
+       // 🎯 Quick Action Functions
+       function openAIResearch() {
+           showAIResearch();
+       }
+
+       function startMeetingAnalysis() {
+           startLiveRecording();
+       }
+
+       function openDocumentEditor() {
+           showNotification('Document Editor opening... (Feature coming soon)', 'info');
+       }
+
+       function joinMeeting() {
+           showNotification('Joining meeting... Opening video call interface.', 'info');
+       }
+
+       function startPreRecord() {
+           showNotification('Pre-recording setup... Preparing for meeting recording.', 'info');
+           setTimeout(() => startLiveRecording(), 1000);
+       }
+
+       function inviteTeamMember() {
+           showNotification('Invite dialog opening... (Feature coming soon)', 'info');
+       }
+
+       function openMeetingChat() {
+           showNotification('Meeting AI Chat opening... (Feature coming soon)', 'info');
+       }
+
+       // 📊 Stats and Analytics
+       function updateAIUsageStats() {
+           // Update daily usage counter
+           const currentUsage = parseInt(localStorage.getItem('dailyAIUsage') || '0');
+           const newUsage = currentUsage + 1;
+           localStorage.setItem('dailyAIUsage', newUsage.toString());
+           
+           // Update credits (simulate cost)
+           const modelCosts = {
+               'GPT-4': 8,
+               'Claude-3': 5,
+               'Gemini': 2
+           };
+           
+           const cost = modelCosts[selectedAIModel] || 5;
+           const currentCredits = parseInt(document.querySelector('.bg-gradient-to-r .font-semibold').textContent);
+           const newCredits = Math.max(0, currentCredits - cost);
+           
+           document.querySelector('.bg-gradient-to-r .font-semibold').textContent = newCredits.toString();
+           
+           showNotification(`Query completed! Used ${cost} credits with ${selectedAIModel}`, 'success');
+       }
+
+       // 🛠️ Utility Functions
+       function toggleSidebar() {
+           const sidebar = document.getElementById('sidebar');
+           const contentArea = document.getElementById('contentArea');
+           
+           sidebarCollapsed = !sidebarCollapsed;
+           
+           if (sidebarCollapsed) {
+               sidebar.classList.add('collapsed');
+               contentArea.classList.add('sidebar-collapsed');
+           } else {
+               sidebar.classList.remove('collapsed');
+               contentArea.classList.remove('sidebar-collapsed');
+           }
+       }
+
+       function showNotification(message, type = 'info') {
+           const notification = document.createElement('div');
+           notification.className = `fixed top-24 right-6 px-6 py-4 rounded-xl shadow-lg z-50 transform transition-all duration-500 translate-x-full max-w-sm ${
+               type === 'success' ? 'bg-green-100 text-green-800 border border-green-200' :
+               type === 'info' ? 'bg-blue-100 text-blue-800 border border-blue-200' :
+               type === 'warning' ? 'bg-yellow-100 text-yellow-800 border border-yellow-200' :
+               type === 'error' ? 'bg-red-100 text-red-800 border border-red-200' :
+               'bg-gray-100 text-gray-800 border border-gray-200'
+           }`;
+           
+           notification.innerHTML = `
+               <div class="flex items-start space-x-3">
+                   <i class="fas ${
+                       type === 'success' ? 'fa-check-circle' : 
+                       type === 'info' ? 'fa-info-circle' : 
+                       type === 'warning' ? 'fa-exclamation-triangle' : 
+                       type === 'error' ? 'fa-times-circle' :
+                       'fa-bell'
+                   } text-lg mt-0.5"></i>
+                   <div>
+                       <div class="font-medium text-sm">${message}</div>
+                       <div class="text-xs opacity-75 mt-1">${new Date().toLocaleTimeString()}</div>
+                   </div>
+                   <button onclick="this.closest('.fixed').remove()" class="ml-2 text-current opacity-50 hover:opacity-100">
+                       <i class="fas fa-times text-sm"></i>
+                   </button>
+               </div>
+           `;
+           
+           document.body.appendChild(notification);
+           
+           setTimeout(() => notification.classList.remove('translate-x-full'), 100);
+           
+           setTimeout(() => {
+               notification.classList.add('translate-x-full');
+               setTimeout(() => {
+                   if (notification.parentNode) {
+                       notification.parentNode.removeChild(notification);
+                   }
+               }, 500);
+           }, 5000);
+       }
+
+       function updateCurrentTime() {
+           const now = new Date();
+           const timeString = now.toLocaleTimeString('th-TH', { 
+               hour: '2-digit', 
+               minute: '2-digit'
+           });
+           const timeElement = document.getElementById('currentTime');
+           if (timeElement) {
+               timeElement.textContent = timeString;
+           }
+       }
+
+       // 🎯 Event Listeners and Initialization
+       document.addEventListener('DOMContentLoaded', function() {
+           // Update time every second
+           updateCurrentTime();
+           setInterval(updateCurrentTime, 1000);
+           
+           // Close dropdown when clicking outside
+           document.addEventListener('click', function(event) {
+               if (!event.target.closest('.ai-model-selector')) {
+                   if (aiModelDropdownOpen) {
+                       toggleAIModelDropdown();
+                   }
+               }
+           });
+           
+           // Keyboard shortcuts
+           document.addEventListener('keydown', function(e) {
+               // Ctrl/Cmd + K for global search
+               if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                   e.preventDefault();
+                   document.querySelector('.search-enhanced').focus();
+               }
+               
+               // Ctrl/Cmd + B for sidebar toggle
+               if ((e.ctrlKey || e.metaKey) && e.key === 'b') {
+                   e.preventDefault();
+                   toggleSidebar();
+               }
+               
+               // Ctrl/Cmd + R for recording toggle
+               if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
+                   e.preventDefault();
+                   if (!isRecording) {
+                       startLiveRecording();
+                   } else {
+                       stopLiveRecording();
+                   }
+               }
+               
+               // Escape to stop recording
+               if (e.key === 'Escape' && isRecording) {
+                   stopLiveRecording();
+               }
+               
+               // Number keys for quick AI model switching
+               if (e.ctrlKey && e.key >= '1' && e.key <= '3') {
+                   e.preventDefault();
+                   const models = ['GPT-4', 'Claude-3', 'Gemini'];
+                   const modelIndex = parseInt(e.key) - 1;
+                   if (models[modelIndex]) {
+                       const model = aiModels[models[modelIndex]];
+                       selectAIModel(models[modelIndex], model.price, model.description);
+                   }
+               }
+           });
+           
+           // Mobile responsive handling
+           function handleMobileLayout() {
+               const sidebar = document.getElementById('sidebar');
+               const contentArea = document.getElementById('contentArea');
+               const rightPanel = document.getElementById('rightPanel');
+               
+               if (window.innerWidth <= 768) {
+                   sidebar.classList.add('mobile-hidden');
+                   contentArea.classList.add('mobile-full');
+                   rightPanel.classList.add('mobile-hidden');
+               } else if (window.innerWidth <= 1280) {
+                   rightPanel.classList.add('mobile-hidden');
+                   contentArea.classList.remove('mobile-full');
+               } else {
+                   sidebar.classList.remove('mobile-hidden');
+                   contentArea.classList.remove('mobile-full');
+                   rightPanel.classList.remove('mobile-hidden');
+               }
+           }
+           
+           window.addEventListener('resize', handleMobileLayout);
+           handleMobileLayout();
+           
+           console.log('🚀 FlowWork AI-First Platform initialized successfully!');
+           
+           // Welcome notification
+           setTimeout(() => {
+               showNotification('Welcome to FlowWork! AI-powered collaboration platform is ready.', 'success');
+           }, 1000);
+           
+           // Demo daily usage
+           if (!localStorage.getItem('dailyAIUsage')) {
+               localStorage.setItem('dailyAIUsage', '24');
+           }
+       });
+
+       // 📱 Additional Mobile Functions
+       function showMobileSidebar() {
+           const sidebar = document.getElementById('sidebar');
+           sidebar.classList.add('mobile-show');
+       }
+
+       function hideMobileSidebar() {
+           const sidebar = document.getElementById('sidebar');
+           sidebar.classList.remove('mobile-show');
+       }
+
+       // 🎯 Feature Placeholder Functions (for future development)
+       function showDocuments() {
+           showNotification('Documents feature coming soon!', 'info');
+       }
+
+       function showTeamWorkspace() {
+           showNotification('Team Workspace feature coming soon!', 'info');
+       }
+
+       function showMeetingHub() {
+           showNotification('Meeting Hub feature coming soon!', 'info');
+       }
+
+       function showUploadRecording() {
+           showNotification('Upload Recording feature coming soon!', 'info');
+       }
+
+       function showMeetingChat() {
+           showNotification('Meeting AI Chat feature coming soon!', 'info');
+       }
+
+       function showActionItems() {
+           showNotification('Action Items feature coming soon!', 'info');
+       }
+
+       function showAnalytics() {
+           showNotification('Analytics feature coming soon!', 'info');
+       }
+
+       function showIntegrations() {
+           showNotification('Integrations feature coming soon!', 'info');
+       }
+
+       function showSettings() {
+           showNotification('Settings feature coming soon!', 'info');
+       }
+
+   </script>
+
+</body>
+</html>

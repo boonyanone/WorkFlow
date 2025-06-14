@@ -1,0 +1,1193 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlowWork - AI Research & Collaboration Suite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .perplexity-response {
+            background: linear-gradient(135deg, #f6f8fb 0%, #ffffff 100%);
+            border-left: 4px solid #10b981;
+        }
+        .user-type-badge {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+        .search-input:focus {
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+
+    <!-- Top Bar -->
+    <header class="bg-white shadow-sm border-b h-16 fixed w-full top-0 z-50">
+        <div class="flex items-center justify-between h-full px-4">
+            <!-- Logo -->
+            <div class="flex items-center space-x-4">
+                <div class="text-2xl font-bold text-green-600">🚀 FlowWork</div>
+                
+                <!-- Global Search -->
+                <div class="hidden md:block relative">
+                    <input type="text" 
+                           placeholder="ค้นหาทั่วไป..." 
+                           class="w-96 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-green-500 search-input">
+                    <i class="fas fa-search absolute right-3 top-3 text-gray-400"></i>
+                </div>
+            </div>
+
+            <!-- Right Section -->
+            <div class="flex items-center space-x-4">
+                <!-- Credits -->
+                <div class="flex items-center space-x-2 bg-green-50 px-3 py-1 rounded-lg">
+                    <i class="fas fa-coins text-green-600"></i>
+                    <span class="text-green-700 font-semibold">1,250</span>
+                </div>
+
+                <!-- Team Selector -->
+                <div class="relative">
+                    <button class="flex items-center space-x-2 px-3 py-2 hover:bg-gray-100 rounded-lg" onclick="toggleTeamDropdown()">
+                        <i class="fas fa-users text-gray-600"></i>
+                        <span class="hidden md:block">ทีมการตลาด</span>
+                        <i class="fas fa-chevron-down text-xs"></i>
+                    </button>
+                </div>
+
+                <!-- Notifications -->
+                <div class="relative">
+                    <button class="p-2 hover:bg-gray-100 rounded-lg relative">
+                        <i class="fas fa-bell text-gray-600"></i>
+                        <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">3</span>
+                    </button>
+                </div>
+
+                <!-- User Menu -->
+                <div class="relative">
+                    <button class="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded-lg">
+                        <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white font-semibold">
+                            โล่
+                        </div>
+                        <i class="fas fa-chevron-down text-xs hidden md:block"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Layout -->
+    <div class="flex pt-16 h-screen">
+        
+        <!-- Left Sidebar -->
+        <aside class="w-80 bg-white shadow-sm border-r overflow-y-auto">
+            <div class="p-4">
+                
+                <!-- User Type Badge -->
+                <div class="user-type-badge text-white px-4 py-2 rounded-lg mb-6">
+                    <div class="flex items-center justify-between">
+                        <span class="font-semibold">ข้าราชการ</span>
+                        <button onclick="changeUserType()" class="text-xs opacity-75 hover:opacity-100">
+                            <i class="fas fa-exchange-alt"></i> เปลี่ยน
+                        </button>
+                    </div>
+                    <div class="text-xs opacity-75 mt-1">Government Official</div>
+                </div>
+
+                <!-- Navigation Menu -->
+                <nav class="space-y-2">
+                    <!-- AI Research -->
+                    <div class="menu-group">
+                        <div class="flex items-center space-x-3 px-3 py-2 bg-green-50 text-green-700 rounded-lg cursor-pointer">
+                            <i class="fas fa-search"></i>
+                            <span class="font-medium">AI Research</span>
+                        </div>
+                        <div class="ml-6 mt-2 space-y-1">
+                            <a href="#" class="block px-3 py-1 text-sm text-gray-600 hover:text-green-600">✨ New Research</a>
+                            <a href="#" class="block px-3 py-1 text-sm text-gray-600 hover:text-green-600">📝 Recent Searches</a>
+                            <a href="#" class="block px-3 py-1 text-sm text-gray-600 hover:text-green-600">⭐ Saved Queries</a>
+                        </div>
+                    </div>
+
+                    <!-- Documents -->
+                    <div class="menu-group">
+                        <div class="flex items-center space-x-3 px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg cursor-pointer">
+                            <i class="fas fa-file-alt"></i>
+                            <span class="font-medium">Documents</span>
+                        </div>
+                    </div>
+
+                    <!-- Team Workspace -->
+                    <div class="menu-group">
+                        <div class="flex items-center space-x-3 px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg cursor-pointer">
+                            <i class="fas fa-users"></i>
+                            <span class="font-medium">Team Workspace</span>
+                            <span class="bg-green-100 text-green-600 text-xs px-2 py-1 rounded-full ml-auto">8</span>
+                        </div>
+                    </div>
+
+                    <!-- Meeting Hub -->
+                    <div class="menu-group">
+                        <div class="flex items-center space-x-3 px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg cursor-pointer">
+                            <i class="fas fa-microphone"></i>
+                            <span class="font-medium">Meeting Hub</span>
+                        </div>
+                    </div>
+
+                    <!-- Analytics -->
+                    <div class="menu-group">
+                        <div class="flex items-center space-x-3 px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg cursor-pointer">
+                            <i class="fas fa-chart-bar"></i>
+                            <span class="font-medium">Analytics</span>
+                        </div>
+                    </div>
+
+                    <!-- Settings -->
+                    <div class="menu-group">
+                        <div class="flex items-center space-x-3 px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg cursor-pointer">
+                            <i class="fas fa-cog"></i>
+                            <span class="font-medium">Settings</span>
+                        </div>
+                    </div>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-y-auto">
+            <div class="p-6">
+                
+                <!-- Page Header -->
+                <div class="mb-6">
+                    <h1 class="text-2xl font-bold text-gray-900 mb-2">🎯 Research Assistant for Government Officials</h1>
+                    <p class="text-gray-600">ค้นหาข้อมูลเชิงลึกจากแหล่งราชการและกฎหมายไทย</p>
+                </div>
+
+                <!-- Search Interface (Perplexity Style) -->
+                <div class="bg-white rounded-xl shadow-sm border p-6 mb-6">
+                    <div class="mb-4">
+                        <div class="relative">
+                            <textarea 
+                                id="mainSearch"
+                                placeholder="ค้นหาข้อมูลเชิงลึก เช่น 'ขั้นตอนการขอจดทะเบียนธุรกิจใหม่ตามกฎหมายไทย'"
+                                class="w-full h-24 p-4 border border-gray-300 rounded-lg resize-none focus:outline-none focus:border-green-500 search-input"
+                                onkeydown="handleSearchKeydown(event)"></textarea>
+                            
+                            <div class="absolute bottom-3 right-3 flex space-x-2">
+                                <button class="p-2 text-gray-400 hover:text-green-600">
+                                    <i class="fas fa-microphone"></i>
+                                </button>
+                                <button class="p-2 text-gray-400 hover:text-green-600">
+                                    <i class="fas fa-paperclip"></i>
+                                </button>
+                                <button onclick="performSearch()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium">
+                                    <i class="fas fa-paper-plane"></i> ส่ง
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Filters -->
+                    <div class="mb-4">
+                        <div class="text-sm text-gray-600 mb-2">🎯 Quick Filters:</div>
+                        <div class="flex flex-wrap gap-2">
+                            <button class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm hover:bg-blue-200">📚 Academic</button>
+                            <button class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm hover:bg-green-200">🏛️ Government</button>
+                            <button class="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm hover:bg-orange-200">📰 News</button>
+                            <button class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm hover:bg-purple-200">🇹🇭 Thai Only</button>
+                            <button class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm hover:bg-gray-200">🌍 Global</button>
+                            <button class="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm hover:bg-red-200">📊 Data</button>
+                        </div>
+                    </div>
+
+                    <!-- Search Response Area -->
+                    <div id="searchResponse" class="hidden">
+                        <div class="perplexity-response rounded-lg p-4 mb-4">
+                            <div class="flex items-start space-x-3">
+                                <div class="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center text-white font-bold">AI</div>
+                                <div class="flex-1">
+                                    <div class="text-gray-900 leading-relaxed" id="responseText"></div>
+                                    <div class="mt-4 flex flex-wrap gap-2" id="sourceCitations"></div>
+                                    <div class="mt-4 pt-4 border-t">
+                                        <div class="flex space-x-2">
+                                            <button onclick="exportToDoc()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm">
+                                                📄 Export to Google Docs
+                                            </button>
+                                            <button onclick="exportToWord()" class="px-4 py-2 bg-blue-800 text-white rounded-lg hover:bg-blue-900 text-sm">
+                                                📝 Export to Word
+                                            </button>
+                                            <button onclick="shareWithTeam()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm">
+                                                👥 Share with Team
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Follow-up Questions -->
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <div class="text-sm text-gray-600 mb-2">💡 Follow-up Questions:</div>
+                            <div class="space-y-2" id="followUpQuestions"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Suggested Research -->
+                <div class="bg-white rounded-xl shadow-sm border p-6 mb-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">💡 Suggested Research for Government Officials:</h3>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div class="p-4 border border-gray-200 rounded-lg hover:border-green-300 cursor-pointer" onclick="suggestedSearch('การขอจดทะเบียนธุรกิจใหม่')">
+                            <div class="font-medium text-gray-900">การขอจดทะเบียนธุรกิจใหม่</div>
+                            <div class="text-sm text-gray-600 mt-1">ขั้นตอนและเอกสารที่จำเป็น</div>
+                        </div>
+                        <div class="p-4 border border-gray-200 rounded-lg hover:border-green-300 cursor-pointer" onclick="suggestedSearch('กฎหมายแรงงาน 2567')">
+                            <div class="font-medium text-gray-900">กฎหมายแรงงาน 2567</div>
+                            <div class="text-sm text-gray-600 mt-1">การปรับปรุงล่าสุด</div>
+                        </div>
+                        <div class="p-4 border border-gray-200 rounded-lg hover:border-green-300 cursor-pointer" onclick="suggestedSearch('ระเบียบการเบิกค่าใช้จ่าย')">
+                            <div class="font-medium text-gray-900">ระเบียบการเบิกค่าใช้จ่าย</div>
+                            <div class="text-sm text-gray-600 mt-1">หลักเกณฑ์และแนวปฏิบัติ</div>
+                        </div>
+                        <div class="p-4 border border-gray-200 rounded-lg hover:border-green-300 cursor-pointer" onclick="suggestedSearch('นโยบายรัฐบาลดิจิทัล')">
+                            <div class="font-medium text-gray-900">นโยบายรัฐบาลดิจิทัล</div>
+                            <div class="text-sm text-gray-600 mt-1">แผนพัฒนาประเทศ</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Research -->
+                <div class="bg-white rounded-xl shadow-sm border p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">📊 Recent Research (3):</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-file-alt text-blue-600"></i>
+                                </div>
+                                <div>
+                                    <div class="font-medium text-gray-900">รายงานงบประมาณ Q1</div>
+                                    <div class="text-sm text-gray-500">2 ชั่วโมงที่แล้ว • 25 credits</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <div class="flex -space-x-2">
+                                    <div class="w-6 h-6 bg-green-500 rounded-full border-2 border-white flex items-center justify-center text-xs text-white">โล่</div>
+                                    <div class="w-6 h-6 bg-blue-500 rounded-full border-2 border-white flex items-center justify-center text-xs text-white">เอ</div>
+                                    <div class="w-6 h-6 bg-purple-500 rounded-full border-2 border-white flex items-center justify-center text-xs text-white">+3</div>
+                                </div>
+                                <button class="text-gray-400 hover:text-gray-600">
+                                    <i class="fas fa-ellipsis-h"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-clipboard-list text-green-600"></i>
+                                </div>
+                                <div>
+                                    <div class="font-medium text-gray-900">ข้อเสนอโครงการใหม่</div>
+                                    <div class="text-sm text-gray-500">5 ชั่วโมงที่แล้ว • 15 credits</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <div class="flex -space-x-2">
+                                    <div class="w-6 h-6 bg-green-500 rounded-full border-2 border-white flex items-center justify-center text-xs text-white">โล่</div>
+                                    <div class="w-6 h-6 bg-blue-500 rounded-full border-2 border-white flex items-center justify-center text-xs text-white">บี</div>
+                                    <div class="w-6 h-6 bg-yellow-500 rounded-full border-2 border-white flex items-center justify-center text-xs text-white">ซี</div>
+                                </div>
+                                <button class="text-gray-400 hover:text-gray-600">
+                                    <i class="fas fa-ellipsis-h"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-chart-bar text-purple-600"></i>
+                                </div>
+                                <div>
+                                    <div class="font-medium text-gray-900">ข้อมูลสถิติประชากร</div>
+                                    <div class="text-sm text-gray-500">1 วันที่แล้ว • 8 credits</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <div class="text-sm text-gray-500">เฉพาะฉัน</div>
+                                <button class="text-gray-400 hover:text-gray-600">
+                                    <i class="fas fa-ellipsis-h"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+
+        <!-- Right Panel -->
+        <aside class="w-80 bg-white shadow-sm border-l overflow-y-auto">
+            <div class="p-4 space-y-6">
+                
+                <!-- Quick Actions -->
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-3">⚡ Quick Actions</h3>
+                    <div class="space-y-2">
+                        <button class="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium">
+                            📝 New Document
+                        </button>
+                        <button class="w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium">
+                            👥 Invite Team
+                        </button>
+                        <button class="w-full px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium">
+                            🎙️ Record Meeting
+                        </button>
+                        <button class="w-full px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-medium">
+                            📤 Export Results
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Team Status -->
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-3">👥 Team Status (Online)</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center space-x-3">
+                            <div class="relative">
+                                <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">โล่</div>
+                                <div class="absolute -bottom-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-white"></div>
+                            </div>
+                            <div>
+                                <div class="font-medium text-gray-900">พี่โล่</div>
+                                <div class="text-xs text-gray-500">Team Leader</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <div class="relative">
+                                <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">เอ</div>
+                                <div class="absolute -bottom-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-white"></div>
+                            </div>
+                            <div>
+                                <div class="font-medium text-gray-900">น้องเอ</div>
+                                <div class="text-xs text-gray-500">Researcher</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <div class="relative">
+                                <div class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">บี</div>
+                                <div class="absolute -bottom-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full border-2 border-white"></div>
+                            </div>
+                            <div>
+                                <div class="font-medium text-gray-900">พี่บี</div>
+                                <div class="text-xs text-gray-500">Away</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <div class="relative">
+                                <div class="w-8 h-8 bg-gray-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">ซี</div>
+                                <div class="absolute -bottom-1 -right-1 w-3 h-3 bg-gray-400 rounded-full border-2 border-white"></div>
+                            </div>
+                            <div>
+                                <div class="font-medium text-gray-900">น้องซี</div>
+                                <div class="text-xs text-gray-500">Offline</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-3">📊 Recent Activity</h3>
+                    <div class="space-y-3 text-sm">
+                        <div class="flex space-x-2">
+                            <span class="text-gray-500">15:30</span>
+                            <div>
+                                <span class="font-medium">พี่โล่</span> shared 
+                                <span class="text-blue-600">"รายงานงบประมาณ"</span>
+                            </div>
+                        </div>
+                        <div class="flex space-x-2">
+                            <span class="text-gray-500">14:45</span>
+                            <div>
+                                <span class="font-medium">น้องเอ</span> finished research on 
+                                <span class="text-green-600">"กฎหมาย"</span>
+                            </div>
+                        </div>
+                        <div class="flex space-x-2">
+                            <span class="text-gray-500">13:20</span>
+                            <div>
+                                <span class="text-purple-600">Meeting recorded</span><br>
+                                <span class="text-gray-500">duration: 45 min</span>
+                            </div>
+                        </div>
+                        <div class="flex space-x-2">
+                            <span class="text-gray-500">12:10</span>
+                            <div>
+                                <span class="font-medium">พี่บี</span> commented on 
+                                <span class="text-blue-600">"โครงการใหม่"</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Credit Usage -->
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-3">💰 Credit Usage</h3>
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm text-gray-600">Today:</span>
+                            <span class="font-semibold">45/100 credits</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2 mb-3">
+                            <div class="bg-green-600 h-2 rounded-full" style="width: 45%"></div>
+                        </div>
+                        
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm text-gray-600">This month:</span>
+                            <span class="font-semibold">180/500 credits</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2 mb-3">
+                            <div class="bg-blue-600 h-2 rounded-full" style="width: 36%"></div>
+                        </div>
+                        
+                        <button class="w-full text-center text-green-600 hover:text-green-700 text-sm font-medium">
+                            📊 View Details
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Notifications -->
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-3">🔔 Notifications (3)</h3>
+                    <div class="space-y-3">
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                            <div class="font-medium text-blue-900 text-sm">New team member joined</div>
+                            <div class="text-xs text-blue-600 mt-1">น้องดี เข้าร่วมทีมการตลาด</div>
+                        </div>
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-3">
+                            <div class="font-medium text-green-900 text-sm">Document ready for review</div>
+                            <div class="text-xs text-green-600 mt-1">รายงานงบประมาณ Q1 พร้อมตรวจสอบ</div>
+                        </div>
+                        <div class="bg-orange-50 border border-orange-200 rounded-lg p-3">
+                            <div class="font-medium text-orange-900 text-sm">Low credits warning</div>
+                            <div class="text-xs text-orange-600 mt-1">เหลือเครดิต 45 credits วันนี้</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Government Tools (User Type Specific) -->
+                <div class="bg-green-50 rounded-lg p-4">
+                    <h3 class="text-lg font-semibold text-green-900 mb-3">🏛️ Government Tools</h3>
+                    <div class="space-y-2">
+                        <button class="w-full px-3 py-2 bg-white border border-green-200 rounded-lg hover:bg-green-50 text-sm">
+                            📜 Law Search (Sommai)
+                        </button>
+                        <button class="w-full px-3 py-2 bg-white border border-green-200 rounded-lg hover:bg-green-50 text-sm">
+                            📋 Form Generator
+                        </button>
+                        <button class="w-full px-3 py-2 bg-white border border-green-200 rounded-lg hover:bg-green-50 text-sm">
+                            📊 Budget Tracker
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Official Schedule -->
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-3">📅 Official Schedule</h3>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-2 h-2 bg-red-500 rounded-full"></div>
+                            <span>Weekly Report Due - Tomorrow</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+                            <span>Budget Meeting - Monday 9:00</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                            <span>Policy Review - Wed 14:00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Compliance Check -->
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-3">🎯 Compliance Check</h3>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex items-center space-x-2">
+                            <i class="fas fa-check-circle text-green-500"></i>
+                            <span>Format approved</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <i class="fas fa-exclamation-triangle text-orange-500"></i>
+                            <span>Citation needed</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <i class="fas fa-clock text-blue-500"></i>
+                            <span>Pending approval</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </aside>
+    </div>
+
+    <!-- User Type Selection Modal -->
+    <div id="userTypeModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+        <div class="flex items-center justify-center h-full p-4">
+            <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+                <h3 class="text-xl font-bold text-gray-900 mb-4">เลือกประเภทผู้ใช้งาน</h3>
+                <div class="space-y-3">
+                    <button onclick="setUserType('student')" class="w-full p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 text-left">
+                        <div class="font-medium text-gray-900">📚 นักเรียน/นักศึกษา</div>
+                        <div class="text-sm text-gray-600">สำหรับทำรายงาน ติวข้อสอบ ถามปัญหาการบ้าน</div>
+                    </button>
+                    <button onclick="setUserType('government')" class="w-full p-4 border-2 border-green-300 bg-green-50 rounded-lg text-left">
+                        <div class="font-medium text-green-900">🏛️ ข้าราชการ</div>
+                        <div class="text-sm text-green-600">ข้อมูลต้องถูกต้องตามหลักวิชาการ พร้อม Sommai AI</div>
+                    </button>
+                    <button onclick="setUserType('business')" class="w-full p-4 border border-gray-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 text-left">
+                        <div class="font-medium text-gray-900">💼 บริษัท/องค์กร</div>
+                        <div class="text-sm text-gray-600">ข้อมูลธุรกิจ การตลาด วิเคราะห์คู่แข่ง</div>
+                    </button>
+                    <button onclick="setUserType('researcher')" class="w-full p-4 border border-gray-200 rounded-lg hover:border-indigo-300 hover:bg-indigo-50 text-left">
+                        <div class="font-medium text-gray-900">🔬 นักวิจัย</div>
+                        <div class="text-sm text-gray-600">สำหรับค้นคว้างานวิจัย บทความวิชาการ</div>
+                    </button>
+                    <button onclick="setUserType('general')" class="w-full p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:bg-gray-50 text-left">
+                        <div class="font-medium text-gray-900">👤 บุคคลทั่วไป</div>
+                        <div class="text-sm text-gray-600">การใช้งานทั่วไป ค้นหาข้อมูลพื้นฐาน</div>
+                    </button>
+                </div>
+                <button onclick="closeUserTypeModal()" class="w-full mt-4 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
+                    ยกเลิก
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // AI Response Simulation Data
+        const aiResponses = {
+            'การขอจดทะเบียนธุรกิจใหม่': {
+                text: `การจดทะเบียนธุรกิจใหม่ในประเทศไทยมีขั้นตอนหลักดังนี้:
+
+**1. การเตรียมเอกสาร**
+- หนังสือรับรองบริษัท (ถ้าเป็นนิติบุคคล)
+- บัตรประชาชนผู้มีอำนาจลงนาม
+- หนังสือมอบอำนาจ (ถ้ามี)
+
+**2. การยื่นคำขอ**
+- ยื่นคำขอที่กรมพัฒนาธุรกิจการค้า
+- ชำระค่าธรรมเนียม 500-1,000 บาท
+- ระยะเวลาดำเนินการ 1-3 วันทำการ
+
+**3. การรับใบทะเบียน**
+- รับใบทะเบียนการค้า
+- ต้องต่ออายุทุก 5 ปี
+
+สำหรับธุรกิจประเภทพิเศษอาจต้องขออนุญาตเพิ่มเติมจากหน่วยงานที่เกี่ยวข้อง`,
+                sources: [
+                    { title: "กรมพัฒนาธุรกิจการค้า", url: "dbd.go.th", confidence: "high" },
+                    { title: "ระเบียบการจดทะเบียนธุรกิจ", url: "ratchakitcha.soc.go.th", confidence: "high" },
+                    { title: "คู่มือผู้ประกอบการ", url: "sme.go.th", confidence: "medium" }
+                ],
+                followUp: [
+                    "ค่าธรรมเนียมการจดทะเบียนแต่ละประเภทธุรกิจ",
+                    "เอกสารเพิ่มเติมสำหรับธุรกิจต่างชาติ",
+                    "ขั้นตอนการต่ออายุใบทะเบียนการค้า"
+                ]
+            },
+            'กฎหมายแรงงาน 2567': {
+                text: `การปรับปรุงกฎหมายแรงงาน พ.ศ. 2567 มีการเปลี่ยนแปลงสำคัญดังนี้:
+
+**1. ค่าแรงขั้นต่ำ**
+- ปรับขึ้นเป็น 370 บาท/วัน ในเขตกรุงเทพฯ
+- 350-365 บาท/วัน ในจังหวัดอื่นๆ
+- มีผลตั้งแต่ 1 มกราคม 2567
+
+**2. การทำงานล่วงเวลา**
+- อัตราค่าล่วงเวลาวันธรรมดา 1.5 เท่า
+- วันหยุดราชการ 2 เท่า
+- จำกัดชั่วโมงล่วงเวลาไม่เกิน 36 ชั่วโมง/สัปดาห์
+
+**3. สิทธิพนักงาน**
+- วันลาป่วยเพิ่มเป็น 30 วัน/ปี
+- วันลากิจ 3 วัน/ปี
+- ค่าชดเชยผู้สูงอายุเพิ่มขึ้น
+
+การบังคับใช้เข้มงวดขึ้น มีการตรวจสอบและปรับโดยกรมสวัสดิการและคุ้มครองแรงงาน`,
+                sources: [
+                    { title: "กรมสวัสดิการและคุ้มครองแรงงาน", url: "dlpw.go.th", confidence: "high" },
+                    { title: "ราชกิจจานุเบกษา เล่ม 141", url: "ratchakitcha.soc.go.th", confidence: "high" },
+                    { title: "สำนักงานปลัดกระทรวงแรงงาน", url: "mol.go.th", confidence: "high" }
+                ],
+                followUp: [
+                    "ตารางค่าแรงขั้นต่ำแยกตามจังหวัด",
+                    "สิทธิการลาของพนักงานตามกฎหมายใหม่",
+                    "บทลงโทษสำหรับนายจ้างที่ฝ่าฝืน"
+                ]
+            }
+        };
+
+        // Current user type
+        let currentUserType = 'government';
+
+        // Search functionality
+        function performSearch() {
+            const searchText = document.getElementById('mainSearch').value.trim();
+            if (!searchText) return;
+
+            showSearchResponse(searchText);
+        }
+
+        function suggestedSearch(query) {
+            document.getElementById('mainSearch').value = query;
+            showSearchResponse(query);
+        }
+
+        function showSearchResponse(query) {
+            const responseDiv = document.getElementById('searchResponse');
+            const responseText = document.getElementById('responseText');
+            const sourceCitations = document.getElementById('sourceCitations');
+            const followUpQuestions = document.getElementById('followUpQuestions');
+
+            // Show loading
+            responseDiv.classList.remove('hidden');
+            responseText.innerHTML = '<div class="flex items-center space-x-2"><div class="animate-spin rounded-full h-4 w-4 border-b-2 border-green-600"></div><span>กำลังค้นหาและวิเคราะห์ข้อมูล...</span></div>';
+            sourceCitations.innerHTML = '';
+            followUpQuestions.innerHTML = '';
+
+            // Simulate AI response after 2 seconds
+            setTimeout(() => {
+                const response = aiResponses[query] || {
+                    text: `ขออภัย ยังไม่มีข้อมูลจำลองสำหรับ "${query}" 
+
+แต่ในระบบจริง FlowWork จะ:
+- ค้นหาจากแหล่งข้อมูลราชการไทย
+- ใช้ Sommai AI วิเคราะห์กฎหมาย
+- อ้างอิงแหล่งที่มาที่เชื่อถือได้
+- สรุปเป็นภาษาไทยที่เข้าใจง่าย
+
+กรุณาลองคำค้นหาที่แนะนำด้านล่างครับ`,
+                    sources: [
+                        { title: "ระบบจำลอง FlowWork", url: "demo.flow.in.th", confidence: "demo" }
+                    ],
+                    followUp: [
+                        "การขอจดทะเบียนธุรกิจใหม่",
+                        "กฎหมายแรงงาน 2567"
+                    ]
+                };
+
+                // Show response text with typing effect
+                typeWriter(responseText, response.text, 50);
+
+                // Show sources
+                sourceCitations.innerHTML = response.sources.map(source => 
+                    `<div class="inline-flex items-center space-x-1 px-2 py-1 bg-gray-100 rounded text-xs">
+                        <div class="w-2 h-2 rounded-full ${getConfidenceColor(source.confidence)}"></div>
+                        <span>${source.title}</span>
+                    </div>`
+                ).join('');
+
+                // Show follow-up questions
+                followUpQuestions.innerHTML = response.followUp.map(question =>
+                    `<button onclick="suggestedSearch('${question}')" class="block w-full text-left px-3 py-2 bg-white border border-gray-200 rounded hover:border-green-300 hover:bg-green-50 text-sm">
+                        ${question}
+                    </button>`
+                ).join('');
+
+                // Scroll to response
+                responseDiv.scrollIntoView({ behavior: 'smooth' });
+            }, 2000);
+        }
+
+        function typeWriter(element, text, speed) {
+            element.innerHTML = '';
+            let i = 0;
+            function type() {
+                if (i < text.length) {
+                    element.innerHTML += text.charAt(i);
+                    i++;
+                    setTimeout(type, speed);
+                }
+            }
+            type();
+        }
+
+        function getConfidenceColor(confidence) {
+            switch(confidence) {
+                case 'high': return 'bg-green-500';
+                case 'medium': return 'bg-yellow-500';
+                case 'low': return 'bg-red-500';
+                default: return 'bg-gray-500';
+            }
+        }
+
+        function handleSearchKeydown(event) {
+            if (event.ctrlKey && event.key === 'Enter') {
+                performSearch();
+            }
+        }
+
+        // Export functions
+        function exportToDoc() {
+            alert('🚀 กำลังส่งข้อมูลไป Google Docs...\n\nในระบบจริง:\n• เชื่อมต่อ Google Drive API\n• สร้างเอกสารใหม่\n• เชิญทีมเข้าร่วมแก้ไข');
+        }
+
+        function exportToWord() {
+            alert('📝 กำลังส่งข้อมูลไป Microsoft Word...\n\nในระบบจริง:\n• เชื่อมต่อ Office 365 API\n• สร้างไฟล์ .docx\n• แชร์ผ่าน OneDrive');
+        }
+
+        function shareWithTeam() {
+            alert('👥 กำลังแชร์กับทีม...\n\nในระบบจริง:\n• ส่งการแจ้งเตือนให้ทีม\n• เพิ่มสิทธิ์การเข้าถึง\n• บันทึกใน Activity Log');
+        }
+
+        // User type functions
+        function changeUserType() {
+            document.getElementById('userTypeModal').classList.remove('hidden');
+        }
+
+        function closeUserTypeModal() {
+            document.getElementById('userTypeModal').classList.add('hidden');
+        }
+
+        function setUserType(type) {
+            currentUserType = type;
+            closeUserTypeModal();
+            updateUIForUserType(type);
+        }
+
+        function updateUIForUserType(type) {
+            const userTypeConfigs = {
+                student: {
+                    title: '📚 นักเรียน/นักศึกษา',
+                    subtitle: 'Student',
+                    headerText: '🎓 Study Assistant for Students',
+                    description: 'ช่วยทำการบ้าน ติวข้อสอบ และเขียนรายงาน',
+                    placeholder: 'ค้นหาข้อมูลการบ้าน เช่น "สมการคณิตศาสตร์" หรือ "การเขียนรายงานวิจัย"',
+                    suggestions: [
+                        { title: 'สมการคณิตศาสตร์ระดับปริญญาตรี', desc: 'วิธีการแก้สมการขั้นสูง' },
+                        { title: 'การเขียนรายงานวิจัยภาษาไทย', desc: 'โครงสร้างและรูปแบบ' },
+                        { title: 'การอ้างอิงแบบ APA Style', desc: 'รูปแบบการอ้างอิงมาตรฐาน' },
+                        { title: 'ประวัติศาสตร์ไทยสมัยอยุธยา', desc: 'เหตุการณ์สำคัญ' }
+                    ],
+                    tools: [
+                        { name: '📝 Citation Helper', desc: 'ช่วยสร้างการอ้างอิง' },
+                        { name: '🧮 Calculator', desc: 'เครื่องคิดเลขวิทยาศาสตร์' },
+                        { name: '📊 Chart Maker', desc: 'สร้างกราฟและตาราง' }
+                    ]
+                },
+                government: {
+                    title: '🏛️ ข้าราชการ',
+                    subtitle: 'Government Official',
+                    headerText: '🎯 Research Assistant for Government Officials',
+                    description: 'ค้นหาข้อมูลเชิงลึกจากแหล่งราชการและกฎหมายไทย',
+                    placeholder: 'ค้นหาข้อมูลเชิงลึก เช่น "ขั้นตอนการขอจดทะเบียนธุรกิจใหม่ตามกฎหมายไทย"',
+                    suggestions: [
+                        { title: 'การขอจดทะเบียนธุรกิจใหม่', desc: 'ขั้นตอนและเอกสารที่จำเป็น' },
+                        { title: 'กฎหมายแรงงาน 2567', desc: 'การปรับปรุงล่าสุด' },
+                        { title: 'ระเบียบการเบิกค่าใช้จ่าย', desc: 'หลักเกณฑ์และแนวปฏิบัติ' },
+                        { title: 'นโยบายรัฐบาลดิจิทัล', desc: 'แผนพัฒนาประเทศ' }
+                    ],
+                    tools: [
+                        { name: '📜 Law Search (Sommai)', desc: 'ค้นหากฎหมายด้วย AI' },
+                        { name: '📋 Form Generator', desc: 'สร้างแบบฟอร์มราชการ' },
+                        { name: '📊 Budget Tracker', desc: 'ติดตามงบประมาณ' }
+                    ]
+                },
+                business: {
+                    title: '💼 บริษัท/องค์กร',
+                    subtitle: 'Business Organization',
+                    headerText: '💼 Business Intelligence Assistant',
+                    description: 'วิเคราะห์ตลาด คู่แข่ง และข้อมูลธุรกิจ',
+                    placeholder: 'ค้นหาข้อมูลธุรกิจ เช่น "แนวโน้มตลาด E-commerce ในไทย 2567"',
+                    suggestions: [
+                        { title: 'แนวโน้มตลาด E-commerce ไทย', desc: 'การเติบโตและโอกาส' },
+                        { title: 'การวิเคราะห์คู่แข่งในอุตสาหกรรม', desc: 'กลยุทธ์การแข่งขัน' },
+                        { title: 'กฎหมายคุ้มครองข้อมูลส่วนบุคคล', desc: 'PDPA สำหรับธุรกิจ' },
+                        { title: 'การตลาดดิจิทัลแนวใหม่', desc: 'เทรนด์และเครื่องมือ' }
+                    ],
+                    tools: [
+                        { name: '📈 Market Analysis', desc: 'วิเคราะห์ตลาดและแนวโน้ม' },
+                        { name: '🏢 Competitor Research', desc: 'ข้อมูลคู่แข่ง' },
+                        { name: '💰 Financial Planning', desc: 'วางแผนการเงิน' }
+                    ]
+                },
+                researcher: {
+                    title: '🔬 นักวิจัย',
+                    subtitle: 'Researcher',
+                    headerText: '🔬 Academic Research Assistant',
+                    description: 'ค้นคว้างานวิจัย บทความวิชาการ และข้อมูลเชิงลึก',
+                    placeholder: 'ค้นหาข้อมูลวิจัย เช่น "งานวิจัยด้าน AI ในการศึกษาไทย"',
+                    suggestions: [
+                        { title: 'งานวิจัยด้าน AI ในการศึกษา', desc: 'แนวโน้มและผลการวิจัย' },
+                        { title: 'วิธีการวิจัยเชิงคุณภาพ', desc: 'หลักการและแนวปฏิบัติ' },
+                        { title: 'การเขียนบทความวิชาการ', desc: 'โครงสร้างและมาตรฐาน' },
+                        { title: 'แหล่งทุนวิจัยในประเทศไทย', desc: 'หน่วยงานให้ทุน' }
+                    ],
+                    tools: [
+                        { name: '📚 Literature Review', desc: 'ทบทวนวรรณกรรม' },
+                        { name: '📊 Data Analysis', desc: 'วิเคราะห์ข้อมูลวิจัย' },
+                        { name: '📝 Citation Manager', desc: 'จัดการการอ้างอิง' }
+                    ]
+                },
+                general: {
+                    title: '👤 บุคคลทั่วไป',
+                    subtitle: 'General User',
+                    headerText: '🌟 General Knowledge Assistant',
+                    description: 'ค้นหาข้อมูลทั่วไป ข่าวสาร และความรู้พื้นฐาน',
+                    placeholder: 'ค้นหาข้อมูลทั่วไป เช่น "วิธีการดูแลสุขภาพในช่วงหน้าฝน"',
+                    suggestions: [
+                        { title: 'วิธีการดูแลสุขภาพในหน้าฝน', desc: 'คำแนะนำสำหรับคนไทย' },
+                        { title: 'สถานที่ท่องเที่ยวใหม่ในไทย', desc: 'แหล่งท่องเที่ยวน่าสนใจ' },
+                        { title: 'เทคนิคการประหยัดเงิน', desc: 'วางแผนการเงินส่วนตัว' },
+                        { title: 'อาหารสุขภาพไทยๆ', desc: 'เมนูอาหารเพื่อสุขภาพ' }
+                    ],
+                    tools: [
+                        { name: '🌍 General Search', desc: 'ค้นหาข้อมูลทั่วไป' },
+                        { name: '📰 News Summary', desc: 'สรุปข่าวประจำวัน' },
+                        { name: '💡 Quick Facts', desc: 'ข้อมูลเร็วและแม่นยำ' }
+                    ]
+                }
+            };
+
+            const config = userTypeConfigs[type];
+            
+            // Update user type badge
+            document.querySelector('.user-type-badge span').textContent = config.title.substring(3);
+            document.querySelector('.user-type-badge .text-xs').textContent = config.subtitle;
+
+            // Update page header
+            document.querySelector('main h1').textContent = config.headerText;
+            document.querySelector('main p').textContent = config.description;
+
+            // Update search placeholder
+            document.getElementById('mainSearch').placeholder = config.placeholder;
+
+            // Update suggested research
+            const suggestionsContainer = document.querySelector('.grid.md\\:grid-cols-2');
+            suggestionsContainer.innerHTML = config.suggestions.map(suggestion =>
+                `<div class="p-4 border border-gray-200 rounded-lg hover:border-green-300 cursor-pointer" onclick="suggestedSearch('${suggestion.title}')">
+                    <div class="font-medium text-gray-900">${suggestion.title}</div>
+                    <div class="text-sm text-gray-600 mt-1">${suggestion.desc}</div>
+                </div>`
+            ).join('');
+
+            // Update tools section (if exists)
+            const toolsSection = document.querySelector('.bg-green-50.rounded-lg');
+            if (toolsSection) {
+                const toolsContainer = toolsSection.querySelector('.space-y-2');
+                toolsContainer.innerHTML = config.tools.map(tool =>
+                    `<button class="w-full px-3 py-2 bg-white border border-green-200 rounded-lg hover:bg-green-50 text-sm">
+                        ${tool.name}
+                    </button>`
+                ).join('');
+            }
+
+            alert(`✅ เปลี่ยนเป็น ${config.title} แล้ว!\n\nอินเทอร์เฟซจะปรับให้เหมาะสมกับการใช้งานของ${config.subtitle}`);
+        }
+
+        // Team dropdown toggle
+        function toggleTeamDropdown() {
+            alert('🚀 Team Selector\n\nในระบบจริงจะแสดง:\n• รายชื่อทีมทั้งหมด\n• สลับระหว่างทีม\n• สร้างทีมใหม่\n• จัดการสมาชิก');
+        }
+
+        // Mobile responsiveness
+        function initMobileResponsive() {
+            const sidebar = document.querySelector('aside:first-of-type');
+            const rightPanel = document.querySelector('aside:last-of-type');
+            const mainContent = document.querySelector('main');
+
+            // Add mobile menu button if screen is small
+            if (window.innerWidth < 768) {
+                // Hide sidebars on mobile initially
+                sidebar.classList.add('hidden');
+                rightPanel.classList.add('hidden');
+                
+                // Add mobile menu button
+                const mobileMenu = document.createElement('button');
+                mobileMenu.innerHTML = '<i class="fas fa-bars"></i>';
+                mobileMenu.className = 'md:hidden p-2 text-gray-600 hover:text-green-600';
+                mobileMenu.onclick = () => {
+                    sidebar.classList.toggle('hidden');
+                };
+                
+                // Add to header
+                const headerLeft = document.querySelector('header .flex:first-child');
+                headerLeft.insertBefore(mobileMenu, headerLeft.firstChild);
+            }
+        }
+
+        // Search suggestions for different contexts
+        const searchSuggestions = {
+            government: [
+                "กฎหมายการจัดซื้อจัดจ้างภาครัฐ",
+                "ระเบียบสำนักนายกรัฐมントรี",
+                "ขั้นตอนการขออนุญาตก่อสร้าง",
+                "การประเมินผลการปฏิบัติราชการ"
+            ],
+            student: [
+                "วิธีการเขียนบทคัดย่อ",
+                "หลักการคิดเลขแคลคูลัส",
+                "ประวัติศาสตร์โลกสมัยใหม่",
+                "เทคนิคการจำศัพท์ภาษาอังกฤษ"
+            ],
+            business: [
+                "การวิเคราะห์ SWOT Analysis",
+                "แผนการตลาดดิจิทัล 2567",
+                "การคำนวณ ROI และ NPV",
+                "กฎหมายแรงงานสำหรับ HR"
+            ]
+        };
+
+        // Auto-complete search functionality
+        function setupSearchAutocomplete() {
+            const searchInput = document.getElementById('mainSearch');
+            let currentSuggestions = searchSuggestions[currentUserType] || searchSuggestions.government;
+            
+            searchInput.addEventListener('input', function() {
+                const value = this.value.toLowerCase();
+                if (value.length > 2) {
+                    const matches = currentSuggestions.filter(item => 
+                        item.toLowerCase().includes(value)
+                    );
+                    
+                    // Show suggestions (would implement dropdown in real system)
+                    if (matches.length > 0) {
+                        console.log('Search suggestions:', matches);
+                    }
+                }
+            });
+        }
+
+        // Initialize dashboard
+        function initDashboard() {
+            initMobileResponsive();
+            setupSearchAutocomplete();
+            
+            // Set focus on search
+            document.getElementById('mainSearch').focus();
+            
+            console.log('🚀 FlowWork Dashboard initialized!');
+            console.log('Current user type:', currentUserType);
+        }
+
+        // Simulate real-time updates
+        function simulateRealTimeUpdates() {
+            // Simulate credit updates
+            setInterval(() => {
+                const creditElement = document.querySelector('.text-green-700.font-semibold');
+                let currentCredits = parseInt(creditElement.textContent.replace(',', ''));
+                
+                // Random small changes
+                if (Math.random() > 0.7) {
+                    currentCredits += Math.floor(Math.random() * 10) - 5;
+                    creditElement.textContent = currentCredits.toLocaleString();
+                }
+            }, 10000);
+
+            // Simulate team activity
+            const activities = [
+                "น้องเอ started new research",
+                "พี่บี uploaded document", 
+                "น้องซี joined meeting",
+                "พี่โล่ shared findings"
+            ];
+
+            setInterval(() => {
+                if (Math.random() > 0.8) {
+                    const randomActivity = activities[Math.floor(Math.random() * activities.length)];
+                    console.log('📢 New activity:', randomActivity);
+                    
+                    // Would update activity feed in real system
+                }
+            }, 15000);
+        }
+
+        // Keyboard shortcuts
+        function setupKeyboardShortcuts() {
+            document.addEventListener('keydown', function(e) {
+                // Ctrl/Cmd + K for quick search
+                if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                    e.preventDefault();
+                    document.getElementById('mainSearch').focus();
+                }
+                
+                // Ctrl/Cmd + Shift + N for new document
+                if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'N') {
+                    e.preventDefault();
+                    exportToDoc();
+                }
+                
+                // Escape to close modals
+                if (e.key === 'Escape') {
+                    closeUserTypeModal();
+                }
+            });
+        }
+
+        // Run when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initDashboard();
+            simulateRealTimeUpdates();
+            setupKeyboardShortcuts();
+            
+            // Show welcome message
+            setTimeout(() => {
+                console.log(`
+🚀 FlowWork Dashboard Demo
+=======================
+✨ ลองพิมพ์ในช่องค้นหา:
+   • การขอจดทะเบียนธุรกิจใหม่
+   • กฎหมายแรงงาน 2567
+   
+🔧 Keyboard Shortcuts:
+   • Ctrl+K: Focus search
+   • Ctrl+Shift+N: New document
+   • Escape: Close modals
+   
+👥 Features:
+   • Click user type badge to change
+   • Try suggested research cards
+   • Test export functions
+                `);
+            }, 1000);
+        });
+
+        // Handle window resize for responsive behavior
+        window.addEventListener('resize', function() {
+            if (window.innerWidth >= 768) {
+                // Show sidebars on desktop
+                document.querySelector('aside:first-of-type').classList.remove('hidden');
+                document.querySelector('aside:last-of-type').classList.remove('hidden');
+            }
+        });
+
+        // Performance monitoring (demo)
+        function trackPerformance() {
+            // Simulate performance tracking
+            setTimeout(() => {
+                console.log('📊 Performance Metrics:');
+                console.log('• Page Load Time: 1.2s');
+                console.log('• AI Response Time: 2.1s');
+                console.log('• Credits Used Today: 45');
+                console.log('• User Satisfaction: 94%');
+            }, 3000);
+        }
+
+        // Start performance tracking
+        trackPerformance();
+    </script>
+
+    <!-- Add some additional mobile-specific styles -->
+    <style>
+        @media (max-width: 768px) {
+            .desktop-only { display: none !important; }
+            
+            aside { 
+                position: fixed;
+                top: 64px;
+                left: 0;
+                height: calc(100vh - 64px);
+                z-index: 40;
+                background: white;
+                box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            }
+            
+            main { 
+                margin-left: 0 !important;
+                width: 100% !important;
+            }
+            
+            .search-input {
+                font-size: 16px; /* Prevent zoom on iOS */
+            }
+        }
+        
+        @media (max-width: 640px) {
+            .text-2xl { font-size: 1.25rem !important; }
+            .text-xl { font-size: 1.125rem !important; }
+            .text-lg { font-size: 1rem !important; }
+            
+            .p-6 { padding: 1rem !important; }
+            .p-4 { padding: 0.75rem !important; }
+            
+            .space-x-4 > * + * { margin-left: 0.5rem !important; }
+            .space-x-3 > * + * { margin-left: 0.5rem !important; }
+        }
+        
+        /* Loading animations */
+        @keyframes pulse-green {
+            0%, 100% { background-color: rgb(16, 185, 129); }
+            50% { background-color: rgb(5, 150, 105); }
+        }
+        
+        .animate-pulse-green {
+            animation: pulse-green 2s ease-in-out infinite;
+        }
+        
+        /* Smooth transitions */
+        * {
+            transition: all 0.2s ease-in-out;
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a1a1a1;
+        }
+    </style>
+
+    <!-- Add PWA capabilities -->
+    <script>
+        // Register service worker for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/sw.js').then(function(registration) {
+                    console.log('🔧 ServiceWorker registration successful:', registration.scope);
+                }, function(err) {
+                    console.log('❌ ServiceWorker registration failed:', err);
+                });
+            });
+        }
+
+        // Add to home screen prompt
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Show install button
+            const installBtn = document.createElement('button');
+            installBtn.innerHTML = '📱 Install App';
+            installBtn.className = 'fixed bottom-4 right-4 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg hover:bg-green-700 z-50';
+            installBtn.onclick = async () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    console.log(`User response to PWA install prompt: ${outcome}`);
+                    deferredPrompt = null;
+                    installBtn.remove();
+                }
+            };
+            document.body.appendChild(installBtn);
+        });
+    </script>
+
+</body>
+</html>

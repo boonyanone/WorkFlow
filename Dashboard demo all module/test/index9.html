@@ -1,0 +1,1818 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlowWork - AI Research & Collaboration Suite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* FlowBuilder Clean Theme */
+        :root {
+            --primary: #7c3aed;
+            --primary-light: #8b5cf6;
+            --purple-50: #faf5ff;
+            --purple-100: #f3e8ff;
+            --purple-500: #a855f7;
+            --purple-600: #9333ea;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+        }
+        
+        body {
+            background: var(--gray-50);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-size: 14px;
+        }
+        
+        /* Top Header - Enhanced Notifications */
+        .top-header {
+            background: white;
+            border-bottom: 1px solid var(--gray-200);
+            backdrop-filter: blur(8px);
+            position: relative;
+        }
+        
+        /* System Status Alert */
+        .system-alert {
+            background: linear-gradient(90deg, #059669 0%, #10b981 100%);
+            color: white;
+            text-align: center;
+            padding: 4px 0;
+            font-size: 12px;
+            font-weight: 500;
+            animation: slideDown 0.3s ease-out;
+        }
+        
+        @keyframes slideDown {
+            from { transform: translateY(-100%); }
+            to { transform: translateY(0); }
+        }
+        
+        .logo {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--purple-500) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+        }
+        
+        .top-search {
+            background: var(--gray-50);
+            border: 1px solid var(--gray-200);
+            border-radius: 10px;
+            transition: all 0.2s ease;
+            font-size: 14px;
+        }
+        
+        .top-search:focus {
+            background: white;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgb(124 58 237 / 0.1);
+        }
+        
+        .status-pill {
+            background: var(--purple-50);
+            color: var(--purple-600);
+            border: 1px solid var(--purple-100);
+            border-radius: 16px;
+            padding: 4px 10px;
+            font-size: 12px;
+            font-weight: 500;
+            position: relative;
+        }
+        
+        .status-pill.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .status-pill.alert {
+            background: #fef3c7;
+            color: #d97706;
+            border-color: #fbbf24;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        /* Left Sidebar - Fixed User Section */
+        .sidebar {
+            background: white;
+            border-right: 1px solid var(--gray-200);
+            width: 260px;
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+        }
+        
+        .sidebar.collapsed {
+            width: 60px;
+        }
+        
+        .sidebar.collapsed .menu-text {
+            opacity: 0;
+            transform: translateX(-10px);
+            transition: opacity 0.15s ease, transform 0.15s ease;
+        }
+        
+        .sidebar.collapsed .submenu {
+            opacity: 0;
+            max-height: 0;
+            transition: opacity 0.15s ease, max-height 0.3s ease;
+        }
+        
+        .sidebar.collapsed .badge-count,
+        .sidebar.collapsed .badge-sm {
+            opacity: 0;
+        }
+        
+        .sidebar.collapsed .user-info {
+            opacity: 0;
+        }
+        
+        .sidebar.collapsed .upgrade-btn {
+            opacity: 0;
+        }
+        
+        .menu-text {
+            opacity: 1;
+            transform: translateX(0);
+            transition: opacity 0.3s ease 0.1s, transform 0.3s ease 0.1s;
+        }
+        
+        .submenu {
+            opacity: 1;
+            max-height: 300px;
+            transition: opacity 0.3s ease 0.1s, max-height 0.3s ease;
+        }
+        
+        .menu-section {
+            padding: 0 16px;
+            margin-bottom: 24px;
+        }
+        
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            border-radius: 8px;
+            color: var(--gray-600);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 2px;
+            transition: all 0.15s ease;
+            position: relative;
+            white-space: nowrap;
+        }
+        
+        .menu-item:hover {
+            background: var(--gray-100);
+            color: var(--gray-900);
+        }
+        
+        .menu-item.active {
+            background: var(--purple-50);
+            color: var(--primary);
+        }
+        
+        .menu-item i {
+            width: 16px;
+            margin-right: 12px;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        
+        .submenu {
+            margin-left: 28px;
+            margin-top: 4px;
+            margin-bottom: 8px;
+        }
+        
+        .submenu-item {
+            display: flex;
+            align-items: center;
+            padding: 6px 12px;
+            color: var(--gray-500);
+            font-size: 13px;
+            text-decoration: none;
+            border-radius: 6px;
+            margin-bottom: 1px;
+            transition: all 0.15s ease;
+            white-space: nowrap;
+        }
+        
+        .submenu-item:hover {
+            color: var(--primary);
+            background: var(--purple-50);
+        }
+        
+        .submenu-item i {
+            width: 14px;
+            margin-right: 8px;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+        
+        /* Status Dots */
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            margin-left: auto;
+            flex-shrink: 0;
+        }
+        
+        .status-dot.green { background: #10b981; }
+        .status-dot.yellow { background: #f59e0b; }
+        .status-dot.red { background: #ef4444; }
+        .status-dot.purple { background: var(--primary); }
+        
+        /* Small Badges */
+        .badge-sm {
+            background: var(--primary);
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 8px;
+            margin-left: auto;
+            font-weight: 600;
+            flex-shrink: 0;
+            transition: opacity 0.2s ease;
+        }
+        
+        .badge-count {
+            background: var(--gray-200);
+            color: var(--gray-700);
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-left: auto;
+            font-weight: 500;
+            flex-shrink: 0;
+            transition: opacity 0.2s ease;
+        }
+        
+        /* Toggle Button */
+        .toggle-btn {
+            position: absolute;
+            top: 20px;
+            right: -12px;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border: 1px solid var(--gray-200);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 10px;
+            color: var(--gray-500);
+            z-index: 10;
+            transition: all 0.2s ease;
+        }
+        
+        .toggle-btn:hover {
+            background: var(--gray-50);
+            color: var(--gray-700);
+        }
+        
+        /* User Account Area - Fixed Layout */
+        .user-account {
+            border-top: 1px solid var(--gray-200);
+            padding: 12px 16px;
+            margin-top: auto;
+        }
+        
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .user-avatar {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--purple-500) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+        
+        .user-info {
+            min-width: 0;
+            transition: opacity 0.3s ease 0.1s;
+        }
+        
+        .user-info h4 {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--gray-900);
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .user-info p {
+            font-size: 11px;
+            color: var(--gray-500);
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .upgrade-btn {
+            width: 100%;
+            background: var(--gray-100);
+            color: var(--gray-700);
+            border: none;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        
+        .upgrade-btn:hover {
+            background: var(--purple-100);
+            color: var(--primary);
+        }
+        
+        /* Main Content */
+        .main-content {
+            background: var(--gray-50);
+            flex: 1;
+        }
+        
+        .content-card {
+            background: white;
+            border: 1px solid var(--gray-200);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05);
+        }
+        
+        .page-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 6px;
+        }
+        
+        .page-subtitle {
+            color: var(--gray-600);
+            font-size: 15px;
+            margin-bottom: 32px;
+        }
+        
+        /* Right Panel - Enhanced AI Insights */
+        .right-panel {
+            background: white;
+            border-left: 1px solid var(--gray-200);
+            width: 320px;
+        }
+        
+        .panel-section {
+            padding: 20px;
+            border-bottom: 1px solid var(--gray-100);
+        }
+        
+        .panel-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--gray-500);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 16px;
+        }
+        
+        /* User Cards in Team Status */
+        .user-card {
+            display: flex;
+            align-items: center;
+            padding: 10px 12px;
+            border: 1px solid var(--gray-200);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            transition: all 0.2s ease;
+        }
+        
+        .user-card:hover {
+            border-color: var(--purple-300);
+            background: var(--purple-50);
+        }
+        
+        .user-card .avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            margin-right: 10px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: white;
+        }
+        
+        .user-card .status-indicator {
+            position: absolute;
+            bottom: -1px;
+            right: -1px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            border: 2px solid white;
+        }
+        
+        .user-card .user-details h5 {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--gray-900);
+            margin: 0;
+        }
+        
+        .user-card .user-details p {
+            font-size: 11px;
+            color: var(--gray-500);
+            margin: 0;
+        }
+        
+        /* Mini Widgets - Improved Layout */
+        .mini-widget {
+            background: var(--gray-50);
+            border: 1px solid var(--gray-200);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+        }
+        
+        .widget-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+        
+        .widget-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--gray-700);
+        }
+        
+        .widget-icon {
+            font-size: 12px;
+            color: var(--gray-500);
+            margin-left: 8px;
+        }
+        
+        .widget-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--gray-900);
+        }
+        
+        .widget-subtitle {
+            font-size: 11px;
+            color: var(--gray-500);
+        }
+        
+        /* Quick Actions - Fixed Icon */
+        .quick-action {
+            width: 100%;
+            text-align: left;
+            padding: 10px 12px;
+            border: 1px solid var(--gray-200);
+            border-radius: 8px;
+            background: white;
+            color: var(--gray-700);
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 6px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        
+        .quick-action:hover {
+            border-color: var(--primary);
+            background: var(--purple-50);
+            color: var(--primary);
+        }
+        
+        .quick-action i {
+            width: 16px;
+            margin-right: 10px;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+        
+        /* Primary Buttons */
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--purple-500) 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 16px;
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgb(124 58 237 / 0.25);
+        }
+        
+        /* Secondary Buttons */
+        .btn-secondary {
+            background: transparent;
+            color: var(--gray-600);
+            border: 1px solid var(--gray-300);
+            border-radius: 8px;
+            padding: 10px 16px;
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-secondary:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: var(--purple-50);
+        }
+        
+        /* Credits Display */
+        .credits-display {
+            background: var(--gray-100);
+            color: var(--gray-700);
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-weight: 600;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        /* Notification Badge */
+        .notification-badge {
+            background: #ef4444;
+            color: white;
+            font-size: 10px;
+            padding: 2px 5px;
+            border-radius: 8px;
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            min-width: 16px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        /* Upload Section - Initially Hidden */
+        .upload-section {
+            display: none;
+        }
+        
+        .upload-section.active {
+            display: block;
+        }
+        
+        /* Meeting Type Options */
+        .meeting-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        
+        .option-card {
+            border: 2px solid var(--gray-200);
+            border-radius: 10px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .option-card:hover {
+            border-color: var(--purple-300);
+            background: var(--purple-50);
+        }
+        
+        .option-card.selected {
+            border-color: var(--primary);
+            background: var(--purple-50);
+        }
+        
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 60px;
+            }
+            .sidebar .menu-text {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            .right-panel {
+                width: 280px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                left: -260px;
+                z-index: 40;
+                height: 100vh;
+            }
+            .sidebar.open {
+                left: 0;
+            }
+            .right-panel {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- System Status Alert -->
+    <div class="system-alert">
+        <i class="fas fa-check-circle mr-2"></i>
+        ระบบ FlowWork ทำงานปกติ • AI Services เชื่อมต่อสำเร็จ • เซิร์ฟเวอร์พร้อมใช้งาน 100%
+    </div>
+
+    <!-- Top Header -->
+    <header class="top-header h-14 fixed w-full top-6 z-50">
+        <div class="flex items-center justify-between h-full px-4">
+            <!-- Left Section -->
+            <div class="flex items-center space-x-4">
+                <button onclick="toggleSidebar()" class="lg:hidden p-2 hover:bg-gray-100 rounded-lg">
+                    <i class="fas fa-bars text-gray-600"></i>
+                </button>
+                
+                <div class="flex items-center space-x-3">
+                    <div class="w-7 h-7 bg-gradient-to-br from-purple-600 to-purple-500 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-rocket text-white text-xs"></i>
+                    </div>
+                    <span class="logo text-lg font-bold">FlowWork</span>
+                    <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">v2.0</span>
+                </div>
+                
+                <div class="hidden md:flex items-center space-x-2">
+                    <div class="status-pill alert">
+                        <i class="fas fa-exclamation-triangle text-xs mr-1"></i> อัปเดต AI ใหม่!
+                    </div>
+                    <div class="status-pill active">
+                        <i class="fas fa-brain text-xs mr-1"></i> AI Functions 16
+                    </div>
+                    <div class="status-pill">
+                        <i class="fas fa-star text-xs mr-1"></i> สำคัญ 2 งาน
+                    </div>
+                </div>
+            </div>
+
+            <!-- Center Search -->
+            <div class="flex-1 max-w-md mx-4">
+                <div class="relative">
+                    <input type="text" 
+                           placeholder="ค้นหาฟังก์ชัน, AI Functions..."
+                           class="top-search w-full px-3 py-2 pl-9 focus:outline-none">
+                    <i class="fas fa-search absolute left-3 top-2.5 text-gray-400 text-xs"></i>
+                </div>
+            </div>
+
+            <!-- Right Section -->
+            <div class="flex items-center space-x-3">
+                <div class="credits-display">
+                    <i class="fas fa-coins text-yellow-600 text-xs"></i>
+                    <span>1,246</span>
+                </div>
+
+                <button class="flex items-center space-x-2 px-3 py-2 hover:bg-gray-50 rounded-lg transition-colors">
+                    <i class="fas fa-users text-gray-600 text-sm"></i>
+                    <span class="hidden md:block text-sm text-gray-700">ทีมการตลาด</span>
+                    <i class="fas fa-chevron-down text-xs text-gray-400"></i>
+                </button>
+
+                <div class="relative">
+                    <button class="p-2 hover:bg-gray-50 rounded-lg relative transition-colors">
+                        <i class="fas fa-bell text-gray-600 text-sm"></i>
+                        <span class="notification-badge">3</span>
+                    </button>
+                </div>
+
+                <div class="relative">
+                    <button class="flex items-center space-x-2 p-1 hover:bg-gray-50 rounded-lg transition-colors">
+                        <div class="w-7 h-7 bg-gradient-to-br from-purple-600 to-purple-500 rounded-full flex items-center justify-center text-white text-xs font-medium">
+                            ศ
+                        </div>
+                        <i class="fas fa-chevron-down text-xs text-gray-400 hidden md:block"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Layout -->
+    <div class="flex pt-20 h-screen">
+        
+        <!-- Left Sidebar -->
+        <aside id="sidebar" class="sidebar overflow-y-auto relative">
+            <!-- Toggle Button -->
+            <div class="toggle-btn" onclick="toggleSidebar()">
+                <i class="fas fa-chevron-left" id="toggleIcon"></i>
+            </div>
+
+            <div class="flex flex-col h-full">
+                <!-- Navigation -->
+                <div class="flex-1 py-6">
+                    <!-- Search -->
+                    <div class="menu-section">
+                        <a href="#" class="menu-item" onclick="showSearch()">
+                            <i class="fas fa-search"></i>
+                            <span class="menu-text">Search</span>
+                        </a>
+                    </div>
+
+                    <!-- Main Navigation -->
+                    <div class="menu-section">
+                        <a href="#" class="menu-item">
+                            <i class="fas fa-home"></i>
+                            <span class="menu-text">Dashboard</span>
+                        </a>
+                        
+                        <a href="#" class="menu-item">
+                            <i class="fas fa-file-alt"></i>
+                            <span class="menu-text">Documents</span>
+                        </a>
+                        
+                        <a href="#" class="menu-item">
+                            <i class="fas fa-users"></i>
+                            <span class="menu-text">Team Workspace</span>
+                            <span class="badge-count">8</span>
+                        </a>
+                        
+                        <a href="#" class="menu-item active" onclick="showMeetingAnalysis()">
+                            <i class="fas fa-microphone"></i>
+                            <span class="menu-text">Meeting Intelligence</span>
+                            <span class="badge-sm">AI</span>
+                        </a>
+                        
+                        <div class="submenu">
+                            <a href="#" class="submenu-item" onclick="startLiveRecording()">
+                                <i class="fas fa-record-vinyl text-red-500"></i>
+                                <span>Live Recording</span>
+                                <span class="status-dot red"></span>
+                            </a>
+                            <a href="#" class="submenu-item" onclick="showUploadSection()">
+                                <i class="fas fa-upload"></i>
+                                <span>Upload Recording</span>
+                            </a>
+                            <a href="#" class="submenu-item">
+                                <i class="fas fa-list"></i>
+                                <span>Past Meetings</span>
+                            </a>
+                            <a href="#" class="submenu-item" onclick="showMeetingChat()">
+                                <i class="fas fa-comments"></i>
+                                <span>Ask Meeting AI</span>
+                                <span class="status-dot purple"></span>
+                            </a>
+                            <a href="#" class="submenu-item">
+                                <i class="fas fa-tasks"></i>
+                                <span>Action Items</span>
+                            </a>
+                        </div>
+                        
+                        <a href="#" class="menu-item">
+                            <i class="fas fa-chart-bar"></i>
+                            <span class="menu-text">Analytics</span>
+                        </a>
+                        
+                        <a href="#" class="menu-item">
+                            <i class="fas fa-cog"></i>
+                            <span class="menu-text">Settings</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- User Account Area - Fixed -->
+                <div class="user-account">
+                    <div class="user-profile">
+                        <div class="user-avatar">โล่</div>
+                        <div class="user-info">
+                            <h4>โล่</h4>
+                            <p>Team Leader</p>
+                        </div>
+                    </div>
+                    <button class="upgrade-btn">
+                        <i class="fas fa-crown mr-1"></i> Upgrade to Pro
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content flex-1 overflow-y-auto">
+            <div class="p-6">
+                
+                <!-- Research Section (Default) -->
+                <div id="researchSection">
+                    <div class="mb-8">
+                        <h1 class="page-title flex items-center">
+                            <i class="fas fa-brain text-purple-600 mr-3"></i> 
+                            AI Research Intelligence Hub
+                            <span class="badge-sm ml-3">All-in-One Platform</span>
+                        </h1>
+                        <p class="page-subtitle">ค้นหา วิเคราะห์ และจัดการข้อมูลด้วยปัญญาประดิษฐ์ รวมทั้งระบบบันทึกการประชุมและทำงานร่วมกันในแพลตฟอร์มเดียว</p>
+                    </div>
+
+                    <!-- Live Recording Status (In Main Content) -->
+                    <div id="liveRecordingCard" class="content-card hidden">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                                <i class="fas fa-record-vinyl text-red-500 mr-3 animate-pulse"></i> 
+                                Live Recording in Progress
+                            </h3>
+                            <button onclick="stopLiveRecording()" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 text-sm transition-colors">
+                                <i class="fas fa-stop mr-2"></i> Stop Recording
+                            </button>
+                        </div>
+                        
+                        <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                            <div class="grid md:grid-cols-3 gap-4 text-sm">
+                                <div>
+                                    <span class="text-red-600 font-medium">Duration:</span
+                                        <span id="recordingTimer" class="text-red-900 font-mono ml-2">00:00</span>
+                               </div>
+                               <div>
+                                   <span class="text-red-600 font-medium">Participants:</span>
+                                   <span class="text-red-900 ml-2">3 detected</span>
+                               </div>
+                               <div>
+                                   <span class="text-red-600 font-medium">Language:</span>
+                                   <span class="text-red-900 ml-2">Thai/English</span>
+                               </div>
+                           </div>
+                           
+                           <div class="mt-4 p-3 bg-white rounded border">
+                               <div class="text-sm font-medium text-red-700 mb-2">Real-time Transcription:</div>
+                               <div id="liveTranscript" class="text-gray-800 min-h-16 max-h-32 overflow-y-auto text-sm">
+                                   <div class="text-gray-400 italic">Listening for speech...</div>
+                               </div>
+                           </div>
+                       </div>
+                   </div>
+
+                   <!-- Search Interface -->
+                   <div class="content-card">
+                       <div class="mb-6">
+                           <div class="relative">
+                               <textarea 
+                                   id="mainSearch"
+                                   placeholder="ค้นหาข้อมูลเชิงลึก เช่น 'ขั้นตอนการขอจดทะเบียนธุรกิจใหม่ตามกฎหมายไทย'"
+                                   class="w-full h-20 p-4 border border-gray-200 rounded-lg resize-none focus:outline-none focus:border-purple-600 focus:ring-2 focus:ring-purple-100 transition-all text-sm"
+                                   onkeydown="handleSearchKeydown(event)"></textarea>
+                               
+                               <div class="absolute bottom-3 right-3 flex space-x-2">
+                                   <button class="p-2 text-gray-400 hover:text-purple-600 transition-colors">
+                                       <i class="fas fa-microphone text-sm"></i>
+                                   </button>
+                                   <button class="p-2 text-gray-400 hover:text-purple-600 transition-colors">
+                                       <i class="fas fa-paperclip text-sm"></i>
+                                   </button>
+                                   <button onclick="performSearch()" class="btn-primary text-sm">
+                                       <i class="fas fa-paper-plane mr-2"></i> ส่ง
+                                   </button>
+                               </div>
+                           </div>
+                       </div>
+
+                       <!-- Quick Filters -->
+                       <div class="mb-6">
+                           <div class="text-sm text-gray-600 mb-3 flex items-center">
+                               <i class="fas fa-filter mr-2"></i> Quick Filters:
+                           </div>
+                           <div class="flex flex-wrap gap-2">
+                               <button class="px-3 py-2 bg-gray-100 text-gray-700 rounded-full text-xs hover:bg-purple-100 hover:text-purple-700 transition-colors">
+                                   <i class="fas fa-graduation-cap mr-1"></i> Academic
+                               </button>
+                               <button class="px-3 py-2 bg-gray-100 text-gray-700 rounded-full text-xs hover:bg-purple-100 hover:text-purple-700 transition-colors">
+                                   <i class="fas fa-university mr-1"></i> Government
+                               </button>
+                               <button class="px-3 py-2 bg-gray-100 text-gray-700 rounded-full text-xs hover:bg-purple-100 hover:text-purple-700 transition-colors">
+                                   <i class="fas fa-newspaper mr-1"></i> News
+                               </button>
+                               <button class="px-3 py-2 bg-gray-100 text-gray-700 rounded-full text-xs hover:bg-purple-100 hover:text-purple-700 transition-colors">
+                                   <i class="fas fa-flag mr-1"></i> Thai Only
+                               </button>
+                               <button class="px-3 py-2 bg-purple-100 text-purple-700 rounded-full text-xs hover:bg-purple-200 transition-colors">
+                                   <i class="fas fa-brain mr-1"></i> Meeting Knowledge
+                               </button>
+                           </div>
+                       </div>
+
+                       <!-- Search Response Area -->
+                       <div id="searchResponse" class="hidden">
+                           <div class="border-l-4 border-purple-600 rounded-lg p-6 mb-6 bg-purple-50">
+                               <div class="flex items-start space-x-4">
+                                   <div class="w-10 h-10 bg-gradient-to-br from-purple-600 to-indigo-600 rounded-full flex items-center justify-center text-white">
+                                       <i class="fas fa-robot"></i>
+                                   </div>
+                                   <div class="flex-1">
+                                       <div class="text-gray-900 leading-relaxed" id="responseText"></div>
+                                       <div class="mt-4 flex flex-wrap gap-2" id="sourceCitations"></div>
+                                       <div class="mt-6 pt-4 border-t border-purple-200">
+                                           <div class="flex flex-wrap gap-2">
+                                               <button onclick="exportToDoc()" class="btn-primary text-sm">
+                                                   <i class="fab fa-google-drive mr-2"></i> Export to Google Docs
+                                               </button>
+                                               <button onclick="exportToWord()" class="btn-secondary text-sm">
+                                                   <i class="fab fa-microsoft mr-2"></i> Export to Word
+                                               </button>
+                                               <button onclick="shareWithTeam()" class="btn-secondary text-sm">
+                                                   <i class="fas fa-share-alt mr-2"></i> Share with Team
+                                               </button>
+                                           </div>
+                                       </div>
+                                   </div>
+                               </div>
+                           </div>
+
+                           <!-- Follow-up Questions -->
+                           <div class="bg-gray-50 rounded-xl p-4">
+                               <div class="text-sm text-gray-600 mb-3 flex items-center">
+                                   <i class="fas fa-lightbulb mr-2"></i> Follow-up Questions:
+                               </div>
+                               <div class="space-y-2" id="followUpQuestions"></div>
+                           </div>
+                       </div>
+                   </div>
+
+                   <!-- Suggested Research for Government Officials -->
+                   <div class="content-card">
+                       <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+                           <i class="fas fa-lightbulb text-purple-600 mr-3"></i> Suggested Research for Government Officials
+                       </h3>
+                       <div class="grid md:grid-cols-2 gap-4">
+                           <div class="p-4 border border-gray-200 rounded-xl hover:border-purple-300 hover:bg-purple-50 cursor-pointer transition-all" onclick="suggestedSearch('การขอจดทะเบียนธุรกิจใหม่')">
+                               <div class="font-medium text-gray-900">การขอจดทะเบียนธุรกิจใหม่</div>
+                               <div class="text-sm text-gray-600 mt-1">ขั้นตอนและเอกสารที่จำเป็น</div>
+                           </div>
+                           <div class="p-4 border border-gray-200 rounded-xl hover:border-purple-300 hover:bg-purple-50 cursor-pointer transition-all" onclick="suggestedSearch('กฎหมายแรงงาน 2567')">
+                               <div class="font-medium text-gray-900">กฎหมายแรงงาน 2567</div>
+                               <div class="text-sm text-gray-600 mt-1">การปรับปรุงล่าสุด</div>
+                           </div>
+                           <div class="p-4 border border-gray-200 rounded-xl hover:border-purple-300 hover:bg-purple-50 cursor-pointer transition-all" onclick="suggestedSearch('ระเบียบการเบิกค่าใช้จ่าย')">
+                               <div class="font-medium text-gray-900">ระเบียบการเบิกค่าใช้จ่าย</div>
+                               <div class="text-sm text-gray-600 mt-1">หลักเกณฑ์และแนวปฏิบัติ</div>
+                           </div>
+                           <div class="p-4 border border-gray-200 rounded-xl hover:border-purple-300 hover:bg-purple-50 cursor-pointer transition-all" onclick="suggestedSearch('นโยบายรัฐบาลดิจิทัล')">
+                               <div class="font-medium text-gray-900">นโยบายรัฐบาลดิจิทัล</div>
+                               <div class="text-sm text-gray-600 mt-1">แผนพัฒนาประเทศ</div>
+                           </div>
+                       </div>
+                   </div>
+
+                   <!-- Recent Research -->
+                   <div class="content-card">
+                       <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+                           <i class="fas fa-history text-gray-600 mr-3"></i> Recent Research (3)
+                       </h3>
+                       <div class="space-y-4">
+                           <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 transition-all">
+                               <div class="flex items-center space-x-3">
+                                   <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                                       <i class="fas fa-file-alt text-purple-600"></i>
+                                   </div>
+                                   <div>
+                                       <div class="font-medium text-gray-900">รายงานงบประมาณ Q1</div>
+                                       <div class="text-sm text-gray-500">2 ชั่วโมงที่แล้ว • 25 credits</div>
+                                   </div>
+                               </div>
+                               <div class="flex items-center space-x-3">
+                                   <div class="flex -space-x-2">
+                                       <div class="w-6 h-6 bg-purple-500 rounded-full border-2 border-white flex items-center justify-center text-xs text-white">
+                                           โล่
+                                       </div>
+                                       <div class="w-6 h-6 bg-gray-500 rounded-full border-2 border-white flex items-center justify-center text-xs text-white">
+                                           เอ
+                                       </div>
+                                       <div class="w-6 h-6 bg-gray-400 rounded-full border-2 border-white flex items-center justify-center text-xs text-white">+3</div>
+                                   </div>
+                                   <button class="text-gray-400 hover:text-gray-600">
+                                       <i class="fas fa-ellipsis-h"></i>
+                                   </button>
+                               </div>
+                           </div>
+                           <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 transition-all">
+                               <div class="flex items-center space-x-3">
+                                   <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                                       <i class="fas fa-chart-bar text-green-600"></i>
+                                   </div>
+                                   <div>
+                                       <div class="font-medium text-gray-900">ข้อมูลการใช้งานระบบใหม่</div>
+                                       <div class="text-sm text-gray-500">5 ชั่วโมงที่แล้ว • 15 credits</div>
+                                   </div>
+                               </div>
+                               <button class="text-gray-400 hover:text-gray-600">
+                                   <i class="fas fa-ellipsis-h"></i>
+                               </button>
+                           </div>
+                           <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 transition-all">
+                               <div class="flex items-center space-x-3">
+                                   <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                       <i class="fas fa-gavel text-blue-600"></i>
+                                   </div>
+                                   <div>
+                                       <div class="font-medium text-gray-900">ข้อมูลสถิติประชากร</div>
+                                       <div class="text-sm text-gray-500">1 วันที่แล้ว • 8 credits</div>
+                                   </div>
+                               </div>
+                               <button class="text-gray-400 hover:text-gray-600">
+                                   <i class="fas fa-ellipsis-h"></i>
+                               </button>
+                           </div>
+                       </div>
+                   </div>
+
+                   <!-- Upload Section - Initially Hidden -->
+                   <div id="uploadSection" class="upload-section">
+                       <div class="content-card">
+                           <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                               <i class="fas fa-upload text-gray-600 mr-3"></i> Upload Meeting Recording
+                           </h3>
+                           
+                           <!-- Meeting Type Selection -->
+                           <div class="mb-6">
+                               <h4 class="text-sm font-medium text-gray-700 mb-3">เลือกประเภทการประชุม:</h4>
+                               <div class="meeting-options">
+                                   <div class="option-card" onclick="selectMeetingType('government')">
+                                       <div class="flex items-center space-x-3">
+                                           <i class="fas fa-university text-purple-600"></i>
+                                           <div>
+                                               <div class="font-medium">Government Meeting</div>
+                                               <div class="text-sm text-gray-500">ประชุมราชการ หน่วยงานรัฐ</div>
+                                           </div>
+                                       </div>
+                                   </div>
+                                   <div class="option-card" onclick="selectMeetingType('team')">
+                                       <div class="flex items-center space-x-3">
+                                           <i class="fas fa-users text-blue-600"></i>
+                                           <div>
+                                               <div class="font-medium">Team Standup</div>
+                                               <div class="text-sm text-gray-500">ประชุมทีมประจำ</div>
+                                           </div>
+                                       </div>
+                                   </div>
+                                   <div class="option-card" onclick="selectMeetingType('project')">
+                                       <div class="flex items-center space-x-3">
+                                           <i class="fas fa-project-diagram text-green-600"></i>
+                                           <div>
+                                               <div class="font-medium">Project Review</div>
+                                               <div class="text-sm text-gray-500">ทบทวนโครงการ</div>
+                                           </div>
+                                       </div>
+                                   </div>
+                                   <div class="option-card" onclick="selectMeetingType('budget')">
+                                       <div class="flex items-center space-x-3">
+                                           <i class="fas fa-dollar-sign text-yellow-600"></i>
+                                           <div>
+                                               <div class="font-medium">Budget Discussion</div>
+                                               <div class="text-sm text-gray-500">หารือเรื่องงบประมาณ</div>
+                                           </div>
+                                       </div>
+                                   </div>
+                               </div>
+                           </div>
+                           
+                           <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-3 mb-4">
+                               <div class="flex items-center space-x-2">
+                                   <i class="fas fa-globe text-indigo-600"></i>
+                                   <span class="text-sm text-indigo-800">รองรับ: ไทย, English, 中文, 日本語</span>
+                               </div>
+                           </div>
+                           
+                           <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-purple-400 hover:bg-purple-50 transition-all cursor-pointer">
+                               <div class="flex flex-col items-center">
+                                   <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-3"></i>
+                                   <p class="text-lg font-medium text-gray-700 mb-2">ลากไฟล์เสียงมาวางที่นี่</p>
+                                   <p class="text-sm text-gray-500 mb-4">รองรับ MP3, WAV, M4A, MP4 (สูงสุด 2GB)</p>
+                                   <button onclick="simulateMeetingUpload()" class="btn-primary">
+                                       <i class="fas fa-folder-open mr-2"></i> เลือกไฟล์
+                                   </button>
+                               </div>
+                           </div>
+                       </div>
+                   </div>
+
+                   <!-- Meeting Summary Section -->
+                   <div id="meetingSummary" class="content-card hidden">
+                       <div class="flex justify-between items-center mb-6">
+                           <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                               <i class="fas fa-brain text-purple-600 mr-2"></i> AI Meeting Summary
+                               <span class="badge-sm ml-2">Enhanced</span>
+                           </h3>
+                           <div class="flex space-x-2">
+                               <button class="btn-secondary text-sm">
+                                   <i class="fas fa-edit mr-1"></i> Edit Template
+                               </button>
+                               <button class="btn-secondary text-sm">
+                                   <i class="fas fa-eye mr-1"></i> Review
+                               </button>
+                               <button onclick="approveMeetingSummary()" class="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700">
+                                   <i class="fas fa-check mr-1"></i> Approve & Send
+                               </button>
+                           </div>
+                       </div>
+
+                       <!-- AI Insights Panel -->
+                       <div class="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-6">
+                           <h4 class="font-semibold text-purple-900 mb-2 flex items-center">
+                               <i class="fas fa-lightbulb text-purple-600 mr-2"></i> AI Insights
+                           </h4>
+                           <div class="grid md:grid-cols-3 gap-4 text-sm">
+                               <div class="text-center">
+                                   <div class="text-2xl font-bold text-purple-600">7</div>
+                                   <div class="text-purple-700">Action Items</div>
+                               </div>
+                               <div class="text-center">
+                                   <div class="text-2xl font-bold text-purple-600">3</div>
+                                   <div class="text-purple-700">Decisions Made</div>
+                               </div>
+                               <div class="text-center">
+                                   <div class="text-2xl font-bold text-purple-600">85%</div>
+                                   <div class="text-purple-700">Confidence Score</div>
+                               </div>
+                           </div>
+                       </div>
+
+                       <!-- Auto-Generated Action Items -->
+                       <div class="border-l-4 border-green-500 pl-4 mb-6">
+                           <h4 class="font-semibold text-gray-900 mb-3 flex items-center">
+                               ✅ Action Items 
+                               <span class="badge-sm ml-2">Auto-Generated</span>
+                           </h4>
+                           <div class="space-y-3">
+                               <div class="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                                   <input type="checkbox" class="mt-1">
+                                   <div class="flex-1">
+                                       <div class="font-medium text-gray-900">น้องเอ: ปรับปรุง API documentation</div>
+                                       <div class="text-sm text-gray-600">Deadline: 5 ธ.ค. 2567 • Priority: High</div>
+                                       <div class="text-xs text-purple-600 mt-1">
+                                           <i class="fas fa-robot mr-1"></i> AI จะส่งอีเมลเตือนอัตโนมัติ 1 วันก่อนครบกำหนด
+                                       </div>
+                                   </div>
+                                   <div class="flex space-x-1">
+                                       <button class="p-1 text-gray-400 hover:text-blue-600" title="Send Email">
+                                           <i class="fas fa-envelope text-xs"></i>
+                                       </button>
+                                       <button class="p-1 text-gray-400 hover:text-green-600" title="Add to Calendar">
+                                           <i class="fas fa-calendar-plus text-xs"></i>
+                                       </button>
+                                   </div>
+                               </div>
+                               <div class="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                                   <input type="checkbox" class="mt-1">
+                                   <div class="flex-1">
+                                       <div class="font-medium text-gray-900">พี่บี: จัดทำรายงานงบประมาณ Q1</div>
+                                       <div class="text-sm text-gray-600">Deadline: 8 ธ.ค. 2567 • Priority: Medium</div>
+                                       <div class="text-xs text-purple-600 mt-1">
+                                           <i class="fas fa-robot mr-1"></i> AI เตรียมเทมเพลตรายงานไว้ให้แล้ว
+                                       </div>
+                                   </div>
+                                   <div class="flex space-x-1">
+                                       <button class="p-1 text-gray-400 hover:text-blue-600" title="Send Email">
+                                           <i class="fas fa-envelope text-xs"></i>
+                                       </button>
+                                       <button class="p-1 text-gray-400 hover:text-green-600" title="Add to Calendar">
+                                           <i class="fas fa-calendar-plus text-xs"></i>
+                                       </button>
+                                   </div>
+                               </div>
+                           </div>
+                       </div>
+
+                       <!-- Export & Share Options -->
+                       <div class="mt-6 pt-6 border-t border-gray-200">
+                           <h4 class="font-medium text-gray-900 mb-3">📤 Export & Automation</h4>
+                           <div class="grid md:grid-cols-2 gap-3">
+                               <button onclick="exportToDoc()" class="btn-primary text-sm">
+                                   <i class="fab fa-google-drive mr-2"></i> Google Docs
+                               </button>
+                               <button onclick="exportToWord()" class="btn-secondary text-sm">
+                                   <i class="fab fa-microsoft mr-2"></i> Word
+                               </button>
+                               <button class="btn-secondary text-sm">
+                                   <i class="fas fa-file-pdf mr-2"></i> PDF Report
+                               </button>
+                               <button onclick="shareWithTeam()" class="btn-secondary text-sm">
+                                   <i class="fas fa-share-alt mr-2"></i> Share with Team
+                               </button>
+                           </div>
+                       </div>
+                   </div>
+               </div>
+           </div>
+       </main>
+
+       <!-- Right Panel - Enhanced -->
+       <aside class="right-panel overflow-y-auto">
+           <!-- Quick Actions -->
+           <div class="panel-section">
+               <h3 class="panel-title">Quick Actions</h3>
+               <div class="space-y-1">
+                   <button class="quick-action">
+                       <i class="fas fa-file-plus text-gray-400"></i> New Document
+                   </button>
+                   <button class="quick-action">
+                       <i class="fas fa-user-plus text-gray-400"></i> Invite Team
+                   </button>
+                   <button class="quick-action" onclick="startLiveRecording()">
+                       <i class="fas fa-record-vinyl text-red-400"></i> Start Recording
+                       <span class="badge-sm ml-auto">Live</span>
+                   </button>
+                   <button class="quick-action" onclick="showMeetingChat()">
+                       <i class="fas fa-comments text-purple-400"></i> Ask Meeting AI
+                       <span class="badge-sm ml-auto">Chat</span>
+                   </button>
+               </div>
+           </div>
+
+           <!-- AI Insights - Fixed Icon Spacing -->
+           <div class="panel-section">
+               <h3 class="panel-title">AI Insights</h3>
+               <div class="space-y-2">
+                   <div class="mini-widget">
+                       <div class="widget-header">
+                           <span class="widget-title">Today's Meetings</span>
+                           <i class="fas fa-calendar widget-icon text-purple-500"></i>
+                       </div>
+                       <div class="widget-value text-purple-600">3</div>
+                       <div class="widget-subtitle">12 action items pending</div>
+                   </div>
+                   
+                   <div class="mini-widget">
+                       <div class="widget-header">
+                           <span class="widget-title">This Week's Performance</span>
+                           <i class="fas fa-chart-line widget-icon text-green-500"></i>
+                       </div>
+                       <div class="widget-value text-green-600">92%</div>
+                       <div class="widget-subtitle">Meeting efficiency score</div>
+                   </div>
+                   
+                   <div class="mini-widget">
+                       <div class="widget-header">
+                           <span class="widget-title">Credits Used</span>
+                           <i class="fas fa-coins widget-icon text-yellow-500"></i>
+                       </div>
+                       <div class="widget-value text-yellow-600">245</div>
+                       <div class="widget-subtitle">This week • 89% of limit</div>
+                   </div>
+               </div>
+           </div>
+
+           <!-- Team Status -->
+           <div class="panel-section">
+               <h3 class="panel-title">Team Status</h3>
+               <div class="space-y-2">
+                   <div class="user-card">
+                       <div class="avatar bg-gradient-to-br from-purple-600 to-purple-500">
+                           โล่
+                           <div class="status-indicator bg-green-400"></div>
+                       </div>
+                       <div class="user-details">
+                           <h5>โล่</h5>
+                           <p>Team Leader • Online</p>
+                       </div>
+                   </div>
+                   
+                   <div class="user-card">
+                       <div class="avatar bg-gradient-to-br from-gray-500 to-gray-600">
+                           เอ
+                           <div class="status-indicator bg-green-400"></div>
+                       </div>
+                       <div class="user-details">
+                           <h5>เอ</h5>
+                           <p>Developer • Available</p>
+                       </div>
+                   </div>
+                   
+                   <div class="user-card">
+                       <div class="avatar bg-gradient-to-br from-indigo-500 to-indigo-600">
+                           บี
+                           <div class="status-indicator bg-yellow-400"></div>
+                       </div>
+                       <div class="user-details">
+                           <h5>บี</h5>
+                           <p>Analyst • In Meeting</p>
+                       </div>
+                   </div>
+                   
+                   <div class="user-card">
+                       <div class="avatar bg-gradient-to-br from-green-500 to-green-600">
+                           ซี
+                           <div class="status-indicator bg-gray-400"></div>
+                       </div>
+                       <div class="user-details">
+                           <h5>ซี</h5>
+                           <p>Designer • Away</p>
+                       </div>
+                   </div>
+               </div>
+           </div>
+
+           <!-- Upcoming Events -->
+           <div class="panel-section">
+               <h3 class="panel-title">Upcoming</h3>
+               <div class="space-y-2">
+                   <div class="mini-widget">
+                       <div class="flex items-center space-x-3">
+                           <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                               <i class="fas fa-calendar text-purple-600 text-xs"></i>
+                           </div>
+                           <div>
+                               <div class="text-sm font-medium text-gray-900">Team Standup</div>
+                               <div class="text-xs text-gray-500">Today, 15:00</div>
+                           </div>
+                       </div>
+                   </div>
+                   
+                   <div class="mini-widget">
+                       <div class="flex items-center space-x-3">
+                           <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-exclamation text-red-600 text-xs"></i>
+                        </div>
+                        <div>
+                            <div class="text-sm font-medium text-gray-900">Budget Report Due</div>
+                            <div class="text-xs text-gray-500">Tomorrow, 17:00</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mini-widget">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-users text-blue-600 text-xs"></i>
+                        </div>
+                        <div>
+                            <div class="text-sm font-medium text-gray-900">Client Meeting</div>
+                            <div class="text-xs text-gray-500">Friday, 14:00</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Files -->
+        <div class="panel-section">
+            <h3 class="panel-title">Recent Files</h3>
+            <div class="space-y-2">
+                <div class="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors">
+                    <div class="w-6 h-6 bg-purple-100 rounded flex items-center justify-center">
+                        <i class="fas fa-file-alt text-purple-600 text-xs"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="text-sm font-medium text-gray-900 truncate">Meeting Minutes Q4</div>
+                        <div class="text-xs text-gray-500">2 hours ago</div>
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors">
+                    <div class="w-6 h-6 bg-green-100 rounded flex items-center justify-center">
+                        <i class="fas fa-chart-bar text-green-600 text-xs"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="text-sm font-medium text-gray-900 truncate">Budget Analysis</div>
+                        <div class="text-xs text-gray-500">Yesterday</div>
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors">
+                    <div class="w-6 h-6 bg-blue-100 rounded flex items-center justify-center">
+                        <i class="fas fa-microphone text-blue-600 text-xs"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="text-sm font-medium text-gray-900 truncate">Team Meeting Audio</div>
+                        <div class="text-xs text-gray-500">3 days ago</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Info - Smaller Size -->
+        <div class="panel-section">
+            <h3 class="panel-title">Quick Info</h3>
+            <div class="space-y-2">
+                <div class="mini-widget">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <div class="text-xs font-medium text-gray-700">Bangkok</div>
+                            <div class="text-xs text-gray-500">Partly Cloudy</div>
+                        </div>
+                        <div class="text-sm font-bold text-gray-900">28°C</div>
+                    </div>
+                </div>
+                
+                <div class="mini-widget">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <div class="text-xs font-medium text-gray-700">Time</div>
+                            <div class="text-xs text-gray-500">Bangkok, Thailand</div>
+                        </div>
+                        <div id="currentTime" class="text-sm font-bold text-gray-900 font-mono">14:32</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </aside>
+</div>
+
+<script>
+// Enhanced AI responses with meeting knowledge
+const aiResponses = {
+    'การขอจดทะเบียนธุรกิจใหม่': {
+        text: `การจดทะเบียนธุรกิจใหม่ในประเทศไทยมีขั้นตอนหลักดังนี้:
+
+**1. การเตรียมเอกสาร**
+- หนังสือรับรองบริษัท (ถ้าเป็นนิติบุคคล)
+- บัตรประชาชนผู้มีอำนาจลงนาม
+- หนังสือมอบอำนาจ (ถ้ามี)
+
+**2. การยื่นคำขอ**
+- ยื่นคำขอที่กรมพัฒนาธุรกิจการค้า
+- ชำระค่าธรรมเนียม 500-1,000 บาท
+- ระยะเวลาดำเนินการ 1-3 วันทำการ
+
+**3. การรับใบทะเบียน**
+- รับใบทะเบียนการค้า
+- ต้องต่ออายุทุก 5 ปี
+
+💡 **Meeting Insight:** ในการประชุมเมื่อวานนี้ ทีมได้หารือเรื่องการจดทะเบียนสำหรับโครงการใหม่ พี่บีแนะนำให้ปรึกษาที่ปรึกษากฎหมายก่อน`,
+        sources: [
+            { title: "กรมพัฒนาธุรกิจการค้า", url: "dbd.go.th", confidence: "high" },
+            { title: "Meeting Minutes 1 Dec 2567", url: "internal", confidence: "meeting" }
+        ],
+        followUp: [
+            "ค่าธรรมเนียมการจดทะเบียนแต่ละประเภทธุรกิจ",
+            "เอกสารเพิ่มเติมสำหรับธุรกิจต่างชาติ"
+        ]
+    }
+};
+
+// State management
+let isRecording = false;
+let recordingTimer = 0;
+let recordingInterval;
+let sidebarCollapsed = false;
+let selectedMeetingType = '';
+
+// Sidebar toggle functionality - Fixed Animation
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const toggleIcon = document.getElementById('toggleIcon');
+    
+    sidebarCollapsed = !sidebarCollapsed;
+    
+    if (sidebarCollapsed) {
+        sidebar.classList.add('collapsed');
+        toggleIcon.classList.remove('fa-chevron-left');
+        toggleIcon.classList.add('fa-chevron-right');
+    } else {
+        sidebar.classList.remove('collapsed');
+        toggleIcon.classList.remove('fa-chevron-right');
+        toggleIcon.classList.add('fa-chevron-left');
+    }
+}
+
+// Meeting type selection
+function selectMeetingType(type) {
+    selectedMeetingType = type;
+    document.querySelectorAll('.option-card').forEach(card => {
+        card.classList.remove('selected');
+    });
+    event.currentTarget.classList.add('selected');
+    showNotification(`Selected: ${type} meeting type`, 'info');
+}
+
+// Show upload section
+function showUploadSection() {
+    document.getElementById('uploadSection').classList.add('active');
+    document.getElementById('uploadSection').scrollIntoView({ behavior: 'smooth' });
+}
+
+// Live recording functions
+function startLiveRecording() {
+    if (isRecording) return;
+    
+    isRecording = true;
+    recordingTimer = 0;
+    
+    // Show live recording card in main content
+    document.getElementById('liveRecordingCard').classList.remove('hidden');
+    
+    // Start timer
+    recordingInterval = setInterval(() => {
+        recordingTimer++;
+        const minutes = Math.floor(recordingTimer / 60);
+        const seconds = recordingTimer % 60;
+        const timeString = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        
+        document.getElementById('recordingTimer').textContent = timeString;
+        
+        // Simulate live transcription every 10 seconds
+        if (recordingTimer % 10 === 0) {
+            simulateLiveTranscription();
+        }
+    }, 1000);
+    
+    showNotification('Live recording started! AI is transcribing in real-time.', 'success');
+}
+
+function stopLiveRecording() {
+    if (!isRecording) return;
+    
+    isRecording = false;
+    clearInterval(recordingInterval);
+    
+    // Hide live recording card
+    document.getElementById('liveRecordingCard').classList.add('hidden');
+    
+    // Show meeting summary
+    setTimeout(() => {
+        document.getElementById('meetingSummary').classList.remove('hidden');
+        document.getElementById('meetingSummary').scrollIntoView({ behavior: 'smooth' });
+    }, 1000);
+    
+    showNotification('Recording stopped. Processing meeting summary...', 'info');
+}
+
+function simulateLiveTranscription() {
+    const transcriptions = [
+        "ครับ เรามาเริ่มการประชุมกันครับ วันนี้เราจะพูดถึงความคืบหน้าของโครงการ FlowWork",
+        "ตอนนี้ผลงานด้านเทคนิคเป็นอย่างไร มีปัญหาอะไรที่ต้องแก้ไขมั้ยครับ",
+        "สำหรับเรื่องงบประมาณ เราควรจะปรับแผนการใช้จ่ายใหม่ให้เหมาะสม",
+        "ผมคิดว่าเราควรจะกำหนดประชุมครั้งถัดไปในสัปดาห์หน้าครับ"
+    ];
+    
+    const randomTranscription = transcriptions[Math.floor(Math.random() * transcriptions.length)];
+    const transcriptDiv = document.getElementById('liveTranscript');
+    
+    // Clear initial message if exists
+    if (transcriptDiv.querySelector('.text-gray-400')) {
+        transcriptDiv.innerHTML = '';
+    }
+    
+    const newLine = document.createElement('div');
+    newLine.className = 'text-gray-800 mb-2 text-sm';
+    newLine.innerHTML = `<span class="font-medium text-purple-600">[${new Date().toLocaleTimeString()}]</span> ${randomTranscription}`;
+    transcriptDiv.appendChild(newLine);
+    
+    // Scroll to bottom
+    transcriptDiv.scrollTop = transcriptDiv.scrollHeight;
+}
+
+// Search and navigation functions
+function showSearch() {
+    document.getElementById('mainSearch').focus();
+}
+
+function showMeetingAnalysis() {
+    showNotification('Meeting Analysis mode activated', 'info');
+}
+
+function showMeetingChat() {
+    showNotification('Meeting Chat feature - Ask AI about your meetings!', 'info');
+}
+
+function performSearch() {
+    const searchText = document.getElementById('mainSearch').value.trim();
+    if (!searchText) return;
+    showSearchResponse(searchText);
+}
+
+function suggestedSearch(query) {
+    document.getElementById('mainSearch').value = query;
+    showSearchResponse(query);
+}
+
+function showSearchResponse(query) {
+    const responseDiv = document.getElementById('searchResponse');
+    const responseText = document.getElementById('responseText');
+    const sourceCitations = document.getElementById('sourceCitations');
+    const followUpQuestions = document.getElementById('followUpQuestions');
+
+    responseDiv.classList.remove('hidden');
+    responseText.innerHTML = '<div class="flex items-center space-x-2"><div class="animate-spin rounded-full h-4 w-4 border-b-2 border-purple-600"></div><span class="text-gray-600">Searching and analyzing...</span></div>';
+
+    setTimeout(() => {
+        const response = aiResponses[query] || {
+            text: `ไม่พบข้อมูลจำลองสำหรับ "${query}" ในระบบ FlowWork ที่จะให้การค้นหาที่ครอบคลุมจากแหล่งข้อมูลราชการไทยและประวัติการประชุมของทีม`,
+            sources: [{ title: "FlowWork Demo", url: "demo.flow.in.th", confidence: "demo" }],
+            followUp: ["การขอจดทะเบียนธุรกิจใหม่", "กฎหมายแรงงาน 2567"]
+        };
+
+        typeWriter(responseText, response.text, 30);
+
+        sourceCitations.innerHTML = response.sources.map(source => 
+            `<div class="inline-flex items-center space-x-2 px-3 py-1 bg-white border border-gray-200 rounded-lg text-xs">
+                <div class="w-2 h-2 rounded-full ${getConfidenceColor(source.confidence)}"></div>
+                <span>${source.title}</span>
+                ${source.confidence === 'meeting' ? '<span class="badge-sm">Meeting</span>' : ''}
+            </div>`
+        ).join('');
+
+        followUpQuestions.innerHTML = response.followUp.map(question =>
+            `<button onclick="suggestedSearch('${question}')" class="block w-full text-left px-4 py-3 bg-white border border-gray-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 text-sm transition-colors">
+                ${question}
+            </button>`
+        ).join('');
+
+        responseDiv.scrollIntoView({ behavior: 'smooth' });
+    }, 1500);
+}
+
+function typeWriter(element, text, speed) {
+    element.innerHTML = '';
+    let i = 0;
+    function type() {
+        if (i < text.length) {
+            element.innerHTML += text.charAt(i);
+            i++;
+            setTimeout(type, speed);
+        }
+    }
+    type();
+}
+
+function getConfidenceColor(confidence) {
+    switch(confidence) {
+        case 'high': return 'bg-green-500';
+        case 'medium': return 'bg-yellow-500';
+        case 'low': return 'bg-red-500';
+        case 'meeting': return 'bg-purple-500';
+        default: return 'bg-gray-500';
+    }
+}
+
+function simulateMeetingUpload() {
+    if (!selectedMeetingType) {
+        showNotification('Please select a meeting type first', 'warning');
+        return;
+    }
+    
+    showNotification('Meeting file uploaded! AI is processing transcription...', 'success');
+    
+    // Show meeting summary after processing
+    setTimeout(() => {
+        document.getElementById('meetingSummary').classList.remove('hidden');
+        document.getElementById('meetingSummary').scrollIntoView({ behavior: 'smooth' });
+    }, 3000);
+}
+
+function handleSearchKeydown(event) {
+    if (event.ctrlKey && event.key === 'Enter') {
+        performSearch();
+    }
+}
+
+function exportToDoc() {
+    showNotification('Exporting to Google Docs...', 'success');
+}
+
+function exportToWord() {
+    showNotification('Exporting to Microsoft Word...', 'success');
+}
+
+function shareWithTeam() {
+    showNotification('Sharing with team...', 'info');
+}
+
+function approveMeetingSummary() {
+    showNotification('Meeting summary approved and distributed to team!', 'success');
+}
+
+// Utility functions
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `fixed top-24 right-6 px-4 py-3 rounded-lg shadow-lg z-50 transform transition-all duration-300 translate-x-full ${
+        type === 'success' ? 'bg-green-100 text-green-800 border border-green-200' :
+        type === 'info' ? 'bg-blue-100 text-blue-800 border border-blue-200' :
+        type === 'warning' ? 'bg-yellow-100 text-yellow-800 border border-yellow-200' :
+        'bg-gray-100 text-gray-800 border border-gray-200'
+    }`;
+    notification.innerHTML = `
+        <div class="flex items-center space-x-2">
+            <i class="fas ${
+                type === 'success' ? 'fa-check-circle' : 
+                type === 'info' ? 'fa-info-circle' : 
+                type === 'warning' ? 'fa-exclamation-triangle' : 
+                'fa-bell'
+            } text-sm"></i>
+            <span class="text-sm font-medium">${message}</span>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => notification.classList.remove('translate-x-full'), 100);
+    setTimeout(() => {
+        notification.classList.add('translate-x-full');
+        setTimeout(() => document.body.removeChild(notification), 300);
+    }, 3000);
+}
+
+function updateCurrentTime() {
+    const now = new Date();
+    const timeString = now.toLocaleTimeString('th-TH', { 
+        hour: '2-digit', 
+        minute: '2-digit'
+    });
+    const timeElement = document.getElementById('currentTime');
+    if (timeElement) {
+        timeElement.textContent = timeString;
+    }
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+    // Update time every second
+    updateCurrentTime();
+    setInterval(updateCurrentTime, 1000);
+    
+    // Focus search on load
+    setTimeout(() => {
+        document.getElementById('mainSearch').focus();
+    }, 500);
+    
+    console.log('🚀 FlowWork Enhanced Design initialized!');
+    
+    setTimeout(() => {
+        showNotification('FlowWork is ready! Enhanced with latest updates.', 'success');
+    }, 1000);
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        document.querySelector('.top-search').focus();
+    }
+    if ((e.ctrlKey || e.metaKey) && e.key === 'b') {
+        e.preventDefault();
+        toggleSidebar();
+    }
+    if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
+        e.preventDefault();
+        if (!isRecording) {
+            startLiveRecording();
+        } else {
+            stopLiveRecording();
+        }
+    }
+    if (e.key === 'Escape') {
+        if (isRecording) {
+            stopLiveRecording();
+        }
+    }
+});
+
+// Mobile responsive
+window.addEventListener('resize', function() {
+    if (window.innerWidth <= 1024 && !sidebarCollapsed) {
+        toggleSidebar();
+    }
+});
+</script>
+
+</body>
+</html>
