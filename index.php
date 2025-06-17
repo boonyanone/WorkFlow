@@ -403,14 +403,13 @@ try {
 
     <!-- FlowWork JavaScript -->
     <script>
-        // Global FlowWork Configuration
-        window.FlowWorkConfig = {
-            version: '<?php echo FLOWWORK_VERSION; ?>',
-            modules: <?php echo json_encode($activeModules); ?>,
-            hasError: <?php echo isset($systemError) ? 'true' : 'false'; ?>,
-            adminUrl: '?admin=true'
-        };
-    </script>
+    window.FlowWorkConfig = {
+        version: '<?php echo FLOWWORK_VERSION; ?>',
+        modules: <?php echo json_encode(array_values($activeModules ?: [])); ?>,
+        hasError: <?php echo isset($systemError) ? 'true' : 'false'; ?>,
+        adminUrl: '?admin=true'
+    };
+</script>
     <script src="assets/js/app.js"></script>
     
     <!-- Module Scripts -->
