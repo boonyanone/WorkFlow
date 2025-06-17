@@ -1,16 +1,12 @@
 /**
  * FlowWork Admin Panel JavaScript
  * Handles module management, uploads, and UI interactions
- * 
- * @version 3.0.0
- * @author FlowWork Team
  */
 
 class FlowWorkAdmin {
     constructor() {
         this.uploadInProgress = false;
         this.currentUpload = null;
-        this.apiBaseUrl = window.location.href.split('?')[0] + '?admin=true';
         
         this.init();
     }
@@ -24,9 +20,6 @@ class FlowWorkAdmin {
         // Initialize event listeners
         this.initEventListeners();
         
-        // Initialize UI components
-        this.initUI();
-        
         console.log('✅ Admin Panel ready!');
     }
     
@@ -34,10 +27,7 @@ class FlowWorkAdmin {
         const uploadZone = document.getElementById('uploadZone');
         const fileInput = document.getElementById('moduleFile');
         
-        if (!uploadZone || !fileInput) {
-            console.warn('Upload components not found');
-            return;
-        }
+        if (!uploadZone || !fileInput) return;
         
         // Drag & Drop events
         uploadZone.addEventListener('dragover', (e) => {
@@ -47,10 +37,7 @@ class FlowWorkAdmin {
         
         uploadZone.addEventListener('dragleave', (e) => {
             e.preventDefault();
-            // Only remove dragover if leaving the upload zone completely
-            if (!uploadZone.contains(e.relatedTarget)) {
-                uploadZone.classList.remove('dragover');
-            }
+            uploadZone.classList.remove('dragover');
         });
         
         uploadZone.addEventListener('drop', (e) => {
@@ -64,8 +51,8 @@ class FlowWorkAdmin {
         });
         
         // Click to upload
-        uploadZone.addEventListener('click', (e) => {
-            if (!this.uploadInProgress && !e.target.closest('button')) {
+        uploadZone.addEventListener('click', () => {
+            if (!this.uploadInProgress) {
                 fileInput.click();
             }
         });
@@ -99,22 +86,6 @@ class FlowWorkAdmin {
                 this.closeModal(e.target.id);
             }
         });
-        
-        // Global error handler
-        window.addEventListener('unhandledrejection', (e) => {
-            console.error('Unhandled promise rejection:', e.reason);
-            this.showNotification('An unexpected error occurred', 'error');
-        });
-    }
-    
-    initUI() {
-        // Create notifications container if it doesn't exist
-        if (!document.getElementById('notifications')) {
-            const container = document.createElement('div');
-            container.id = 'notifications';
-            container.className = 'notifications-container';
-            document.body.appendChild(container);
-        }
     }
     
     // File Upload Handling
@@ -123,8 +94,6 @@ class FlowWorkAdmin {
         if (!this.validateFile(file)) {
             return;
         }
-        
-        console.log('📦 Starting upload:', file.name);
         
         // Prepare upload
         this.showUploadProgress();
@@ -141,23 +110,15 @@ class FlowWorkAdmin {
     
     validateFile(file) {
         // Check file type
-        const allowedTypes = ['.zip'];
-        const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
-        
-        if (!allowedTypes.includes(fileExtension)) {
+        if (!file.name.toLowerCase().endsWith('.zip')) {
             this.showNotification('Invalid file type. Please upload a .zip file.', 'error');
             return false;
         }
         
-        // Check file size (default 10MB, but respect server settings)
-        const maxSize = 50 * 1024 * 1024; // 50MB fallback
+        // Check file size (10MB default)
+        const maxSize = 10 * 1024 * 1024; // 10MB
         if (file.size > maxSize) {
-            this.showNotification('File too large. Maximum size is 50MB.', 'error');
-            return false;
-        }
-        
-        if (file.size === 0) {
-            this.showNotification('File is empty. Please select a valid module package.', 'error');
+            this.showNotification('File too large. Maximum size is 10MB.', 'error');
             return false;
         }
         
@@ -170,44 +131,32 @@ class FlowWorkAdmin {
         // Progress tracking
         xhr.upload.addEventListener('progress', (e) => {
             if (e.lengthComputable) {
-                const percentComplete = Math.round((e.loaded / e.total) * 100);
-                this.updateProgress(percentComplete, `Uploading... ${percentComplete}%`);
+                const percentComplete = (e.loaded / e.total) * 100;
+                this.updateProgress(percentComplete, 'Uploading...');
             }
-        });
-        
-        // Load start
-        xhr.addEventListener('loadstart', () => {
-            this.updateProgress(0, 'Starting upload...');
         });
         
         // Response handling
         xhr.addEventListener('load', () => {
-            if (xhr.status >= 200 && xhr.status < 300) {
+            if (xhr.status === 200) {
                 try {
                     const response = JSON.parse(xhr.responseText);
                     this.handleUploadResponse(response);
                 } catch (e) {
-                    console.error('JSON parse error:', e);
-                    this.handleUploadError('Invalid server response: ' + xhr.responseText.substring(0, 100));
+                    this.handleUploadError('Invalid server response');
                 }
             } else {
-                this.handleUploadError(`Server error: HTTP ${xhr.status}`);
+                this.handleUploadError(`Server error: ${xhr.status}`);
             }
         });
         
         // Error handling
         xhr.addEventListener('error', () => {
-            this.handleUploadError('Network error: Unable to connect to server');
-        });
-        
-        xhr.addEventListener('timeout', () => {
-            this.handleUploadError('Upload timeout: Server took too long to respond');
+            this.handleUploadError('Network error occurred');
         });
         
         // Send request
-        xhr.open('POST', this.apiBaseUrl);
-        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-        xhr.timeout = 60000; // 60 second timeout
+        xhr.open('POST', window.location.href);
         xhr.send(formData);
         
         this.currentUpload = xhr;
@@ -222,22 +171,15 @@ class FlowWorkAdmin {
             
             setTimeout(() => {
                 this.showUploadResult(response, 'success');
+                this.refreshModulesGrid();
             }, 1000);
             
             this.showNotification(
                 `Module "${response.module}" v${response.version} installed successfully!`,
                 'success'
             );
-            
-            // Refresh page after successful installation
-            setTimeout(() => {
-                if (confirm('Module installed successfully! Reload page to see changes?')) {
-                    window.location.reload();
-                }
-            }, 2000);
-            
         } else {
-            this.handleUploadError(response.error || 'Installation failed for unknown reason');
+            this.handleUploadError(response.error || 'Installation failed');
         }
     }
     
@@ -245,20 +187,16 @@ class FlowWorkAdmin {
         this.uploadInProgress = false;
         this.currentUpload = null;
         
-        console.error('Upload error:', error);
-        
         this.showUploadResult({ error }, 'error');
         this.showNotification(`Installation failed: ${error}`, 'error');
+        
+        console.error('Upload error:', error);
     }
     
     showUploadProgress() {
-        const uploadZone = document.getElementById('uploadZone');
-        const uploadProgress = document.getElementById('uploadProgress');
-        const uploadResult = document.getElementById('uploadResult');
-        
-        if (uploadZone) uploadZone.style.display = 'none';
-        if (uploadProgress) uploadProgress.style.display = 'block';
-        if (uploadResult) uploadResult.style.display = 'none';
+        document.getElementById('uploadZone').style.display = 'none';
+        document.getElementById('uploadProgress').style.display = 'block';
+        document.getElementById('uploadResult').style.display = 'none';
         
         this.updateProgress(0, 'Preparing upload...');
     }
@@ -268,11 +206,11 @@ class FlowWorkAdmin {
         const progressText = document.getElementById('progressText');
         
         if (progressFill) {
-            progressFill.style.width = `${Math.min(100, Math.max(0, percent))}%`;
+            progressFill.style.width = `${Math.round(percent)}%`;
         }
         
         if (progressText) {
-            progressText.textContent = text || 'Processing...';
+            progressText.textContent = text;
         }
     }
     
@@ -280,14 +218,14 @@ class FlowWorkAdmin {
         const resultDiv = document.getElementById('uploadResult');
         const progressDiv = document.getElementById('uploadProgress');
         
-        if (progressDiv) progressDiv.style.display = 'none';
-        if (resultDiv) resultDiv.style.display = 'block';
+        progressDiv.style.display = 'none';
+        resultDiv.style.display = 'block';
         
         if (type === 'success') {
             resultDiv.innerHTML = `
                 <div class="result-success">
                     <div style="display: flex; align-items: center; gap: 12px;">
-                        <i class="fas fa-check-circle" style="font-size: 24px; color: #10b981; flex-shrink: 0;"></i>
+                        <i class="fas fa-check-circle" style="font-size: 24px; color: #10b981;"></i>
                         <div>
                             <h4 style="margin: 0; color: #065f46;">Module Installed Successfully!</h4>
                             <p style="margin: 4px 0 0; color: #047857;">
@@ -295,15 +233,12 @@ class FlowWorkAdmin {
                             </p>
                         </div>
                     </div>
-                    <div style="margin-top: 16px; display: flex; gap: 8px; flex-wrap: wrap;">
+                    <div style="margin-top: 16px; display: flex; gap: 8px;">
                         <button onclick="admin.activateModule('${response.module}')" class="btn-success">
                             <i class="fas fa-play"></i> Activate Now
                         </button>
                         <button onclick="admin.resetUpload()" class="btn-secondary">
                             <i class="fas fa-plus"></i> Install Another
-                        </button>
-                        <button onclick="window.location.reload()" class="btn-primary">
-                            <i class="fas fa-refresh"></i> Reload Page
                         </button>
                     </div>
                 </div>
@@ -312,11 +247,11 @@ class FlowWorkAdmin {
             resultDiv.innerHTML = `
                 <div class="result-error">
                     <div style="display: flex; align-items: center; gap: 12px;">
-                        <i class="fas fa-exclamation-triangle" style="font-size: 24px; color: #dc2626; flex-shrink: 0;"></i>
+                        <i class="fas fa-exclamation-triangle" style="font-size: 24px; color: #dc2626;"></i>
                         <div>
                             <h4 style="margin: 0; color: #991b1b;">Installation Failed</h4>
-                            <p style="margin: 4px 0 0; color: #b91c1c; word-break: break-word;">
-                                ${response.error || 'Unknown error occurred'}
+                            <p style="margin: 4px 0 0; color: #b91c1c;">
+                                ${response.error}
                             </p>
                         </div>
                     </div>
@@ -331,15 +266,10 @@ class FlowWorkAdmin {
     }
     
     resetUpload() {
-        const uploadZone = document.getElementById('uploadZone');
-        const uploadProgress = document.getElementById('uploadProgress');
-        const uploadResult = document.getElementById('uploadResult');
-        const fileInput = document.getElementById('moduleFile');
-        
-        if (uploadZone) uploadZone.style.display = 'block';
-        if (uploadProgress) uploadProgress.style.display = 'none';
-        if (uploadResult) uploadResult.style.display = 'none';
-        if (fileInput) fileInput.value = '';
+        document.getElementById('uploadZone').style.display = 'block';
+        document.getElementById('uploadProgress').style.display = 'none';
+        document.getElementById('uploadResult').style.display = 'none';
+        document.getElementById('moduleFile').value = '';
         
         this.uploadInProgress = false;
         this.currentUpload = null;
@@ -358,36 +288,21 @@ class FlowWorkAdmin {
     
     // Module Management
     activateModule(moduleName) {
-        if (!moduleName) {
-            this.showNotification('Module name is required', 'error');
-            return;
-        }
-        
         this.moduleAction('activate', moduleName, 'Activating module...', 'Module activated successfully');
     }
     
     deactivateModule(moduleName) {
-        if (!moduleName) {
-            this.showNotification('Module name is required', 'error');
-            return;
-        }
-        
         this.moduleAction('deactivate', moduleName, 'Deactivating module...', 'Module deactivated successfully');
     }
     
     deleteModule(moduleName) {
-        if (!moduleName) {
-            this.showNotification('Module name is required', 'error');
-            return;
-        }
-        
-        if (confirm(`Are you sure you want to delete the module "${moduleName}"?\n\nThis action cannot be undone and will remove all module files.`)) {
+        if (confirm(`Are you sure you want to delete the module "${moduleName}"?\n\nThis action cannot be undone.`)) {
             this.moduleAction('delete', moduleName, 'Deleting module...', 'Module deleted successfully');
         }
     }
     
     moduleAction(action, moduleName, loadingText, successText) {
-        // Show loading notification
+        // Show loading state
         this.showNotification(loadingText, 'info');
         
         // Disable module card
@@ -395,108 +310,43 @@ class FlowWorkAdmin {
         if (moduleCard) {
             moduleCard.style.opacity = '0.5';
             moduleCard.style.pointerEvents = 'none';
-            
-            // Add loading indicator
-            const loadingIcon = document.createElement('div');
-            loadingIcon.className = 'module-loading';
-            loadingIcon.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-            loadingIcon.style.cssText = `
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                background: rgba(255, 255, 255, 0.9);
-                padding: 8px;
-                border-radius: 50%;
-                z-index: 10;
-            `;
-            moduleCard.style.position = 'relative';
-            moduleCard.appendChild(loadingIcon);
         }
         
-        // Build URL with proper encoding
-        const url = `${this.apiBaseUrl.split('?')[0]}?admin=true&action=${encodeURIComponent(action)}&module=${encodeURIComponent(moduleName)}`;
-        
         // Send request
-        fetch(url, {
-            method: 'GET',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'Accept': 'application/json',
-                'Cache-Control': 'no-cache'
-            }
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-            }
-            
-            // Check if response is JSON
-            const contentType = response.headers.get('content-type');
-            if (!contentType || !contentType.includes('application/json')) {
-                throw new Error('Server returned non-JSON response');
-            }
-            
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                this.showNotification(successText, 'success');
-                
-                // For delete action, remove the card immediately
-                if (action === 'delete' && moduleCard) {
-                    moduleCard.style.transition = 'all 0.3s ease';
-                    moduleCard.style.transform = 'scale(0)';
-                    moduleCard.style.opacity = '0';
+        fetch(`?action=${action}&module=${encodeURIComponent(moduleName)}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    this.showNotification(successText, 'success');
                     
+                    // Refresh modules grid
                     setTimeout(() => {
-                        moduleCard.remove();
-                        // Update stats
-                        this.updateModuleStats();
-                    }, 300);
-                } else {
-                    // Refresh page for activate/deactivate
-                    setTimeout(() => {
-                        window.location.reload();
+                        this.refreshModulesGrid();
                     }, 1000);
+                } else {
+                    this.showNotification(`Action failed: ${data.error}`, 'error');
+                    
+                    // Re-enable module card
+                    if (moduleCard) {
+                        moduleCard.style.opacity = '';
+                        moduleCard.style.pointerEvents = '';
+                    }
                 }
+            })
+            .catch(error => {
+                this.showNotification(`Network error: ${error.message}`, 'error');
                 
-            } else {
-                throw new Error(data.error || 'Unknown server error');
-            }
-        })
-        .catch(error => {
-            console.error('Module action error:', error);
-            this.showNotification(`Action failed: ${error.message}`, 'error');
-            
-            // Re-enable module card
-            if (moduleCard) {
-                moduleCard.style.opacity = '';
-                moduleCard.style.pointerEvents = '';
-                
-                // Remove loading indicator
-                const loadingIcon = moduleCard.querySelector('.module-loading');
-                if (loadingIcon) {
-                    loadingIcon.remove();
+                // Re-enable module card
+                if (moduleCard) {
+                    moduleCard.style.opacity = '';
+                    moduleCard.style.pointerEvents = '';
                 }
-            }
-        });
-    }
-    
-    updateModuleStats() {
-        // Update the stats in the header
-        const moduleCards = document.querySelectorAll('.module-card');
-        const activeCards = document.querySelectorAll('.module-card.active');
-        
-        const totalStat = document.querySelector('.section-stats .stat strong');
-        const activeStat = document.querySelector('.section-stats .stat:last-child strong');
-        
-        if (totalStat) totalStat.textContent = moduleCards.length;
-        if (activeStat) activeStat.textContent = activeCards.length;
+            });
     }
     
     refreshModulesGrid() {
-        // Simple page reload - in production this could be optimized
+        // Simple page reload for now
+        // In production, this could be a partial refresh
         window.location.reload();
     }
     
@@ -504,11 +354,6 @@ class FlowWorkAdmin {
     showSystemInfo() {
         const modal = document.getElementById('systemInfoModal');
         const content = document.getElementById('systemInfoContent');
-        
-        if (!modal || !content) {
-            console.error('System info modal not found');
-            return;
-        }
         
         // Show modal with loading
         modal.style.display = 'flex';
@@ -520,166 +365,131 @@ class FlowWorkAdmin {
         `;
         
         // Fetch system info
-        fetch(`${this.apiBaseUrl}?action=system_info`, {
-            method: 'GET',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'Accept': 'application/json'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                const info = data.data;
-                content.innerHTML = `
-                    <div class="system-info-grid">
-                        <div class="info-section">
-                            <h4><i class="fas fa-server"></i> System</h4>
-                            <div class="info-grid">
-                                <div class="info-item">
-                                    <span class="info-label">FlowWork Version:</span>
-                                    <span class="info-value">${info.flowwork_version}</span>
+        fetch('?action=system_info')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const info = data.data;
+                    content.innerHTML = `
+                        <div class="system-info-grid">
+                            <div class="info-section">
+                                <h4><i class="fas fa-server"></i> System</h4>
+                                <div class="info-grid">
+                                    <div class="info-item">
+                                        <span class="info-label">FlowWork Version:</span>
+                                        <span class="info-value">${info.flowwork_version}</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">PHP Version:</span>
+                                        <span class="info-value">${info.php_version}</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Memory Limit:</span>
+                                        <span class="info-value">${info.memory_limit}</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Upload Max Size:</span>
+                                        <span class="info-value">${info.upload_max_filesize}</span>
+                                    </div>
                                 </div>
-                                <div class="info-item">
-                                    <span class="info-label">PHP Version:</span>
-                                    <span class="info-value">${info.php_version}</span>
+                            </div>
+                            
+                            <div class="info-section">
+                                <h4><i class="fas fa-puzzle-piece"></i> Modules</h4>
+                                <div class="info-grid">
+                                    <div class="info-item">
+                                        <span class="info-label">Total Modules:</span>
+                                        <span class="info-value">${info.modules_total}</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Active Modules:</span>
+                                        <span class="info-value">${info.modules_active}</span>
+                                    </div>
                                 </div>
-                                <div class="info-item">
-                                    <span class="info-label">Server Software:</span>
-                                    <span class="info-value">${info.server_software}</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Memory Limit:</span>
-                                    <span class="info-value">${info.memory_limit}</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Upload Max Size:</span>
-                                    <span class="info-value">${info.upload_max_filesize}</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Max Execution Time:</span>
-                                    <span class="info-value">${info.max_execution_time}</span>
+                            </div>
+                            
+                            <div class="info-section">
+                                <h4><i class="fas fa-hdd"></i> Storage</h4>
+                                <div class="info-grid">
+                                    <div class="info-item">
+                                        <span class="info-label">Available Disk Space:</span>
+                                        <span class="info-value">${info.disk_space}</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                         
-                        <div class="info-section">
-                            <h4><i class="fas fa-puzzle-piece"></i> Modules</h4>
-                            <div class="info-grid">
-                                <div class="info-item">
-                                    <span class="info-label">Total Modules:</span>
-                                    <span class="info-value">${info.modules_total}</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Active Modules:</span>
-                                    <span class="info-value">${info.modules_active}</span>
-                                </div>
-                            </div>
+                        <style>
+                        .system-info-grid {
+                            display: grid;
+                            gap: 24px;
+                        }
+                        .info-section h4 {
+                            display: flex;
+                            align-items: center;
+                            gap: 8px;
+                            margin-bottom: 12px;
+                            color: var(--gray-900);
+                            font-size: 16px;
+                        }
+                        .info-grid {
+                            display: grid;
+                            gap: 8px;
+                        }
+                        .info-item {
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center;
+                            padding: 8px 12px;
+                            background: var(--gray-50);
+                            border-radius: 6px;
+                        }
+                        .info-label {
+                            color: var(--gray-600);
+                            font-size: 14px;
+                        }
+                        .info-value {
+                            color: var(--gray-900);
+                            font-weight: 500;
+                            font-size: 14px;
+                        }
+                        </style>
+                    `;
+                } else {
+                    content.innerHTML = `
+                        <div style="text-align: center; padding: 20px; color: var(--danger);">
+                            <i class="fas fa-exclamation-triangle" style="font-size: 32px; margin-bottom: 12px;"></i>
+                            <p>Failed to load system information</p>
                         </div>
-                        
-                        <div class="info-section">
-                            <h4><i class="fas fa-hdd"></i> Storage</h4>
-                            <div class="info-grid">
-                                <div class="info-item">
-                                    <span class="info-label">Available Disk Space:</span>
-                                    <span class="info-value">${info.disk_space}</span>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="info-section">
-                            <h4><i class="fas fa-clock"></i> Current Time</h4>
-                            <div class="info-grid">
-                                <div class="info-item">
-                                    <span class="info-label">Server Time:</span>
-                                    <span class="info-value">${info.current_time}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <style>
-                    .system-info-grid {
-                        display: grid;
-                        gap: 24px;
-                    }
-                    .info-section h4 {
-                        display: flex;
-                        align-items: center;
-                        gap: 8px;
-                        margin-bottom: 12px;
-                        color: var(--gray-900);
-                        font-size: 16px;
-                    }
-                    .info-grid {
-                        display: grid;
-                        gap: 8px;
-                    }
-                    .info-item {
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                        padding: 8px 12px;
-                        background: var(--gray-50);
-                        border-radius: 6px;
-                    }
-                    .info-label {
-                        color: var(--gray-600);
-                        font-size: 14px;
-                    }
-                    .info-value {
-                        color: var(--gray-900);
-                        font-weight: 500;
-                        font-size: 14px;
-                    }
-                    </style>
-                `;
-            } else {
+                    `;
+                }
+            })
+            .catch(error => {
                 content.innerHTML = `
                     <div style="text-align: center; padding: 20px; color: var(--danger);">
                         <i class="fas fa-exclamation-triangle" style="font-size: 32px; margin-bottom: 12px;"></i>
-                        <p>Failed to load system information</p>
-                        <p style="font-size: 14px; color: var(--gray-600);">${data.error || 'Unknown error'}</p>
+                        <p>Error: ${error.message}</p>
                     </div>
                 `;
-            }
-        })
-        .catch(error => {
-            console.error('System info error:', error);
-            content.innerHTML = `
-                <div style="text-align: center; padding: 20px; color: var(--danger);">
-                    <i class="fas fa-exclamation-triangle" style="font-size: 32px; margin-bottom: 12px;"></i>
-                    <p>Error loading system information</p>
-                    <p style="font-size: 14px; color: var(--gray-600);">${error.message}</p>
-                </div>
-            `;
-        });
+            });
     }
     
     showModuleInfo(moduleName) {
         const modal = document.getElementById('moduleInfoModal');
         const content = document.getElementById('moduleInfoContent');
         
-        if (!modal || !content) {
-            console.error('Module info modal not found');
-            return;
-        }
-        
         // Find module data from the page
         const moduleCard = document.querySelector(`[data-module="${moduleName}"]`);
-        if (!moduleCard) {
-            this.showNotification('Module information not found', 'error');
-            return;
-        }
+        if (!moduleCard) return;
         
         // Extract module information
-        const moduleIcon = moduleCard.querySelector('.module-icon')?.textContent || '📦';
-        const moduleDisplayName = moduleCard.querySelector('.module-name')?.textContent || moduleName;
-        const moduleVersion = moduleCard.querySelector('.module-version')?.textContent || 'v1.0.0';
-        const moduleAuthor = moduleCard.querySelector('.module-author')?.textContent || 'by Unknown';
-        const moduleDescription = moduleCard.querySelector('.module-description p')?.textContent || 'No description available';
-        const moduleStatus = moduleCard.querySelector('.status-badge')?.textContent.trim() || 'Unknown';
-        const installedDate = moduleCard.querySelector('.meta-item')?.textContent.replace('Installed: ', '') || 'Unknown';
+        const moduleIcon = moduleCard.querySelector('.module-icon').textContent;
+        const moduleName_display = moduleCard.querySelector('.module-name').textContent;
+        const moduleVersion = moduleCard.querySelector('.module-version').textContent;
+        const moduleAuthor = moduleCard.querySelector('.module-author').textContent;
+        const moduleDescription = moduleCard.querySelector('.module-description p').textContent;
+        const moduleStatus = moduleCard.querySelector('.status-badge').textContent.trim();
+        const installedDate = moduleCard.querySelector('.meta-item').textContent.replace('Installed: ', '');
         
         // Show modal
         modal.style.display = 'flex';
@@ -688,10 +498,10 @@ class FlowWorkAdmin {
                 <div class="module-header-detail">
                     <div class="module-icon-large">${moduleIcon}</div>
                     <div class="module-info-detail">
-                        <h3>${moduleDisplayName}</h3>
+                        <h3>${moduleName_display}</h3>
                         <div class="module-meta-detail">
                             <span class="badge">${moduleVersion}</span>
-                            <span class="badge ${moduleStatus.toLowerCase().includes('active') ? 'active' : 'inactive'}">${moduleStatus}</span>
+                            <span class="badge">${moduleStatus}</span>
                         </div>
                         <p class="module-author-detail">${moduleAuthor}</p>
                     </div>
@@ -755,14 +565,6 @@ class FlowWorkAdmin {
                 font-size: 12px;
                 color: var(--gray-700);
             }
-            .badge.active {
-                background: #dcfce7;
-                color: #166534;
-            }
-            .badge.inactive {
-                background: var(--gray-100);
-                color: var(--gray-600);
-            }
             .module-author-detail {
                 font-size: 14px;
                 color: var(--gray-600);
@@ -821,10 +623,7 @@ class FlowWorkAdmin {
     // Notification System
     showNotification(message, type = 'info', duration = 5000) {
         const container = document.getElementById('notifications');
-        if (!container) {
-            console.warn('Notifications container not found');
-            return;
-        }
+        if (!container) return;
         
         const notification = document.createElement('div');
         notification.className = `notification ${type}`;
@@ -836,17 +635,10 @@ class FlowWorkAdmin {
             info: 'fa-info-circle'
         };
         
-        const titleMap = {
-            success: 'Success',
-            error: 'Error',
-            warning: 'Warning',
-            info: 'Information'
-        };
-        
         notification.innerHTML = `
             <i class="fas ${iconMap[type]} notification-icon ${type}"></i>
             <div class="notification-content">
-                <div class="notification-title">${titleMap[type]}</div>
+                <div class="notification-title">${this.getNotificationTitle(type)}</div>
                 <div class="notification-message">${message}</div>
             </div>
             <button class="notification-close" onclick="this.parentNode.remove()">
@@ -856,13 +648,12 @@ class FlowWorkAdmin {
         
         container.appendChild(notification);
         
-        // Show notification with animation
-       setTimeout(() => {
-        notification.classList.add('show');
-    }, 100);
-    
-    // Auto remove notification
-    if (duration > 0) {
+        // Show notification
+        setTimeout(() => {
+            notification.classList.add('show');
+        }, 100);
+        
+        // Auto remove
         setTimeout(() => {
             notification.classList.remove('show');
             setTimeout(() => {
@@ -873,245 +664,54 @@ class FlowWorkAdmin {
         }, duration);
     }
     
-    // Limit number of notifications
-    const notifications = container.children;
-    if (notifications.length > 5) {
-        const oldest = notifications[0];
-        oldest.classList.remove('show');
-        setTimeout(() => {
-            if (oldest.parentNode) {
-                oldest.parentNode.removeChild(oldest);
-            }
-        }, 300);
+    getNotificationTitle(type) {
+        const titles = {
+            success: 'Success',
+            error: 'Error',
+            warning: 'Warning',
+            info: 'Information'
+        };
+        return titles[type] || 'Notification';
     }
 }
 
-// Utility Methods
-formatFileSize(bytes) {
-    if (bytes === 0) return '0 Bytes';
-    
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-}
-
-formatDate(dateString) {
-    try {
-        const date = new Date(dateString);
-        return date.toLocaleDateString('th-TH', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    } catch (e) {
-        return dateString;
-    }
-}
-
-// Debug methods
-debug(message, data = null) {
-    if (window.location.hostname === 'localhost' || window.location.search.includes('debug=true')) {
-        console.log('🔧 FlowWork Debug:', message, data);
-    }
-}
-
-// Health check
-async healthCheck() {
-    try {
-        const response = await fetch(`${this.apiBaseUrl}?action=system_info`, {
-            method: 'GET',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'Accept': 'application/json'
-            }
-        });
-        
-        if (response.ok) {
-            const data = await response.json();
-            return data.success;
-        }
-        return false;
-    } catch (e) {
-        return false;
-    }
-}
-}
-
-// Global functions for easy access and backward compatibility
+// Global functions for easy access
 function selectFile() {
-if (window.admin) {
-    document.getElementById('moduleFile')?.click();
-}
+    document.getElementById('moduleFile').click();
 }
 
 function cancelUpload() {
-if (window.admin) {
     admin.cancelUpload();
-}
 }
 
 function activateModule(moduleName) {
-if (window.admin) {
     admin.activateModule(moduleName);
-}
 }
 
 function deactivateModule(moduleName) {
-if (window.admin) {
     admin.deactivateModule(moduleName);
-}
 }
 
 function deleteModule(moduleName) {
-if (window.admin) {
     admin.deleteModule(moduleName);
-}
 }
 
 function showSystemInfo() {
-if (window.admin) {
     admin.showSystemInfo();
-}
 }
 
 function showModuleInfo(moduleName) {
-if (window.admin) {
     admin.showModuleInfo(moduleName);
-}
 }
 
 function closeModal(modalId) {
-if (window.admin) {
     admin.closeModal(modalId);
-}
-}
-
-// Enhanced global functions with better UX
-function showGlobalLoading(message, subtext) {
-const overlay = document.getElementById('loadingOverlay');
-const text = document.getElementById('loadingText');
-const subText = document.getElementById('loadingSubtext');
-
-if (overlay) {
-    if (text) text.textContent = message || 'Processing...';
-    if (subText) subText.textContent = subtext || 'Please wait';
-    overlay.style.display = 'flex';
-}
-}
-
-function hideGlobalLoading() {
-const overlay = document.getElementById('loadingOverlay');
-if (overlay) {
-    overlay.style.display = 'none';
-}
 }
 
 // Initialize admin when DOM is ready
 let admin;
 document.addEventListener('DOMContentLoaded', function() {
-try {
     admin = new FlowWorkAdmin();
-    window.admin = admin; // Make it globally accessible
-    
-    // Initial health check
-    admin.healthCheck().then(isHealthy => {
-        if (!isHealthy) {
-            admin.showNotification('System health check failed. Some features may not work properly.', 'warning', 10000);
-        }
-    });
-    
-    // Auto-update stats every 30 seconds
-    setInterval(() => {
-        admin.updateModuleStats();
-    }, 30000);
-    
-} catch (error) {
-    console.error('Failed to initialize FlowWork Admin:', error);
-    
-    // Fallback notification
-    const container = document.createElement('div');
-    container.innerHTML = `
-        <div style="
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #fef2f2;
-            border: 1px solid #fecaca;
-            color: #dc2626;
-            padding: 16px;
-            border-radius: 8px;
-            max-width: 400px;
-            z-index: 10000;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        ">
-            <h4 style="margin: 0 0 8px 0; font-size: 14px;">
-                <i class="fas fa-exclamation-triangle"></i> Admin Panel Error
-            </h4>
-            <p style="margin: 0; font-size: 13px;">
-                Failed to initialize admin panel. Please refresh the page.
-            </p>
-            <button onclick="window.location.reload()" style="
-                margin-top: 8px;
-                padding: 4px 8px;
-                border: none;
-                background: #dc2626;
-                color: white;
-                border-radius: 4px;
-                cursor: pointer;
-                font-size: 12px;
-            ">
-                Refresh Page
-            </button>
-        </div>
-    `;
-    document.body.appendChild(container);
-}
 });
 
-// Handle page visibility changes
-document.addEventListener('visibilitychange', function() {
-if (!document.hidden && window.admin) {
-    // Page became visible again, do a quick health check
-    admin.healthCheck().then(isHealthy => {
-        if (!isHealthy) {
-            console.warn('Health check failed after page visibility change');
-        }
-    });
-}
-});
-
-// Handle online/offline status
-window.addEventListener('online', function() {
-if (window.admin) {
-    admin.showNotification('Connection restored', 'success', 3000);
-}
-});
-
-window.addEventListener('offline', function() {
-if (window.admin) {
-    admin.showNotification('Connection lost. Some features may not work.', 'warning', 10000);
-}
-});
-
-// Performance monitoring
-if (window.performance && window.performance.mark) {
-window.performance.mark('flowwork-admin-js-loaded');
-}
-
-console.log('🎛️ FlowWork Admin JavaScript loaded successfully');
-
-// Export for module system integration
-if (typeof module !== 'undefined' && module.exports) {
-module.exports = FlowWorkAdmin;
-}
-
-// AMD support
-if (typeof define === 'function' && define.amd) {
-define([], function() {
-    return FlowWorkAdmin;
-});
-}
+console.log('🎛️ FlowWork Admin JavaScript loaded');
