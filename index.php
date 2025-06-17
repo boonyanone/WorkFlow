@@ -1,66 +1,46 @@
 <?php
 /**
- * FlowWork 3.0 - Modular AI Platform
- * Entry Point & Application Bootstrap
- * 
- * @version 3.0.0
- * @author FlowWork Team
+ * FlowWork 3.0 - Complete Dashboard with Sidebar
  */
 
-// System constants (only define if not already defined)
-if (!defined('FLOWWORK_VERSION')) {
-    define('FLOWWORK_VERSION', '3.0.0');
-}
-if (!defined('FLOWWORK_PATH')) {
-    define('FLOWWORK_PATH', __DIR__);
-}
-if (!defined('CORE_PATH')) {
-    define('CORE_PATH', FLOWWORK_PATH . '/core');
-}
-if (!defined('MODULES_PATH')) {
-    define('MODULES_PATH', FLOWWORK_PATH . '/modules/installed');
-}
-if (!defined('DATA_PATH')) {
-    define('DATA_PATH', FLOWWORK_PATH . '/data');
-}
-if (!defined('ASSETS_PATH')) {
-    define('ASSETS_PATH', FLOWWORK_PATH . '/assets');
-}
+// Basic constants
+define('FLOWWORK_VERSION', '3.0.0');
+define('FLOWWORK_PATH', __DIR__);
+define('CORE_PATH', FLOWWORK_PATH . '/core');
+define('MODULES_PATH', FLOWWORK_PATH . '/modules/installed');
+define('DATA_PATH', FLOWWORK_PATH . '/data');
 
-// Error reporting (only in development)
-if (strpos($_SERVER['HTTP_HOST'], 'localhost') !== false || 
-    strpos($_SERVER['HTTP_HOST'], '127.0.0.1') !== false) {
-    error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
-} else {
+// Error handling
+if (strpos($_SERVER['HTTP_HOST'], 'localhost') === false) {
     error_reporting(0);
     ini_set('display_errors', 0);
 }
 
-// Check for admin request
-if (isset($_GET['admin']) || strpos($_SERVER['REQUEST_URI'], '/admin') !== false) {
+// Check for admin
+if (isset($_GET['admin'])) {
     require_once 'admin.php';
     exit;
 }
 
-// Load core components
-require_once CORE_PATH . '/config.php';
-require_once CORE_PATH . '/module-manager.php';
+// Load core
+$activeModules = [];
+$systemError = null;
 
 try {
-    // Initialize system
-    $config = new FlowWorkConfig();
-    $moduleManager = new FlowWorkModuleManager($config);
+    if (file_exists(CORE_PATH . '/config.php')) {
+        require_once CORE_PATH . '/config.php';
+    }
+    if (file_exists(CORE_PATH . '/module-manager.php')) {
+        require_once CORE_PATH . '/module-manager.php';
+    }
     
-    // Get active modules
-    $activeModules = $moduleManager->getActiveModules();
-    
-    // Load modules
-    $moduleManager->loadActiveModules();
-    
+    if (class_exists('FlowWorkConfig')) {
+        $config = new FlowWorkConfig();
+        $moduleManager = new FlowWorkModuleManager($config);
+        $activeModules = $moduleManager->getActiveModules();
+    }
 } catch (Exception $e) {
-    // Error handling
     $systemError = $e->getMessage();
-    $activeModules = [];
 }
 ?>
 <!DOCTYPE html>
@@ -74,308 +54,373 @@ try {
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Core Styles -->
-    <link href="./assets/core.css" rel="stylesheet">
-    
-    <!-- Module Styles -->
-    <?php foreach ($activeModules as $module): ?>
-        <?php if (isset($module['assets']['css'])): ?>
-            <link href="modules/installed/<?php echo $module['name']; ?>/<?php echo $module['assets']['css']; ?>" rel="stylesheet">
-        <?php endif; ?>
-    <?php endforeach; ?>
-    
-    <style>
-        /* Quick fixes for missing styles */
-        
-        .flowwork-app { display: block !important; } /* เปลี่ยนจาก none เป็น block */
-        .loading-screen { 
-        position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
-        display: flex; align-items: center; justify-content: center;
-     background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-        flex-direction: column; gap: 20px;
-        }
-/* ... rest of styles remain the same */
-        .loading-spinner {
-            width: 64px; height: 64px; border: 4px solid #e2e8f0;
-            border-top: 4px solid #6366f1; border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        
-        .app-header {
-            height: 64px; background: rgba(255,255,255,0.95);
-            border-bottom: 1px solid #e2e8f0; position: fixed;
-            top: 0; left: 0; right: 0; z-index: 999;
-            display: flex; align-items: center; padding: 0 24px;
-            backdrop-filter: blur(12px);
-        }
-        .header-logo { font-size: 24px; font-weight: 700; color: #6366f1; }
-        
-        .app-container { display: flex; min-height: 100vh; padding-top: 64px; }
-        
-        .app-sidebar {
-            position: fixed; top: 64px; left: 0; bottom: 0; width: 280px;
-            background: white; border-right: 1px solid #e2e8f0;
-            overflow-y: auto; z-index: 998;
-        }
-        .sidebar-content { padding: 24px 0; }
-        .module-navigation { padding: 0 16px; }
-        
-        .nav-item {
-            display: flex; align-items: center; padding: 12px 16px;
-            border-radius: 12px; color: #6b7280; font-size: 14px;
-            font-weight: 500; margin-bottom: 4px; transition: all 0.2s ease;
-            cursor: pointer; gap: 12px;
-        }
-        .nav-item:hover { background: #f3f4f6; color: #374151; }
-        .nav-item.active {
-            background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
-            color: #6366f1; font-weight: 600;
-        }
-        .nav-item i { width: 20px; text-align: center; }
-        
-        .app-content {
-            flex: 1; margin-left: 280px; min-height: calc(100vh - 64px);
-            padding: 24px; overflow-y: auto;
-        }
-        
-        .welcome-message {
-            text-align: center; padding: 80px 20px; color: #6b7280;
-        }
-        .welcome-message h2 {
-            font-size: 28px; font-weight: 700; color: #374151; margin-bottom: 8px;
-        }
-        
-        .system-error {
-            background: #fef2f2; border: 1px solid #fecaca; color: #dc2626;
-            padding: 16px; border-radius: 8px; margin: 20px;
-        }
-        
-        @media (max-width: 768px) {
-            .app-sidebar { transform: translateX(-100%); }
-            .app-content { margin-left: 0; padding: 16px; }
-        }
-    </style>
+    <!-- FlowWork CSS -->
+    <link href="assets/css/main.css" rel="stylesheet">
 </head>
+
 <body>
-    <!-- Loading Screen -->
-    <div id="loadingScreen" class="loading-screen">
-        <div class="loading-spinner"></div>
-        <h3>กำลังโหลด FlowWork...</h3>
-        <p>กำลังตั้งค่า modules และระบบ...</p>
-    </div>
-    
-    <!-- Application Container -->
-    <div id="flowworkApp" class="flowwork-app">
-        
-        <!-- Header -->
-        <header class="app-header" id="appHeader">
-            <div class="header-logo">
-                <i class="fas fa-rocket"></i> FlowWork
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <!-- Left Section -->
+            <div class="header-left">
+                <button class="mobile-menu-btn" onclick="toggleMobileSidebar()">
+                    <i class="fas fa-bars"></i>
+                </button>
+                
+                <div class="logo-section">
+                    <div class="logo-icon">
+                        <i class="fas fa-rocket"></i>
+                    </div>
+                    <span class="logo-text">FlowWork</span>
+                    <span class="version-badge">v<?php echo FLOWWORK_VERSION; ?></span>
+                </div>
             </div>
-            <div style="margin-left: auto;">
-                <a href="?admin=true" style="color: #6366f1; text-decoration: none; font-weight: 500;">
-                    <i class="fas fa-cog"></i> Admin
+
+            <!-- Search -->
+            <div class="search-container">
+                <input type="text" class="search-input" placeholder="Ask AI anything... (Ctrl+K)">
+                <i class="fas fa-search search-icon"></i>
+            </div>
+
+            <!-- Right Section -->
+            <div class="header-right">
+                <!-- Credits -->
+                <div class="header-btn credits-btn">
+                    <i class="fas fa-coins"></i>
+                    <span id="creditsCount">1,246</span>
+                    <span class="text-mobile-hide">credits</span>
+                </div>
+
+                <!-- Workspace Toggle -->
+                <button class="header-btn workspace-toggle" id="workspaceToggle" onclick="SidebarSettings.show()">
+                    <i class="fas fa-sidebar"></i>
+                    <span class="text-mobile-hide">Workspace</span>
+                </button>
+                
+                <!-- Team -->
+                <button class="team-btn">
+                    <i class="fas fa-users"></i>
+                    <span>ทีมการตลาด</span>
+                    <i class="fas fa-chevron-down" style="font-size: 12px;"></i>
+                </button>
+
+                <!-- Admin -->
+                <a href="?admin=true" class="header-btn" style="background: var(--gray-100); color: var(--gray-700);">
+                    <i class="fas fa-cog"></i>
+                    <span class="text-mobile-hide">Admin</span>
                 </a>
+
+                <!-- Notifications -->
+                <button class="notification-btn">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge">3</span>
+                </button>
+
+                <!-- User -->
+                <button class="user-btn">
+                    <div class="user-avatar">โล่</div>
+                    <i class="fas fa-chevron-down" style="font-size: 12px; color: var(--gray-400);"></i>
+                </button>
             </div>
-        </header>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="main-container">
         
-        <!-- Main Container -->
-        <div class="app-container">
-            
-            <!-- Sidebar Navigation -->
-            <aside class="app-sidebar" id="appSidebar">
-                <div class="sidebar-content">
-                    <!-- Dynamic Navigation -->
-                    <nav id="moduleNavigation" class="module-navigation">
-                        <!-- Default Dashboard item -->
-                        <div class="nav-item active" onclick="loadModule('dashboard')">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="sidebar">
+            <div class="sidebar-content">
+                <!-- Navigation -->
+                <div class="sidebar-nav">
+                    <!-- Main -->
+                    <div class="nav-section">
+                        <div class="nav-item active" onclick="FlowWork.loadModule('dashboard')">
                             <i class="fas fa-home"></i>
                             <span>Dashboard</span>
                         </div>
-                        <!-- Modules will register nav items here -->
-                    </nav>
-                </div>
-            </aside>
-            
-            <!-- Content Area -->
-            <main class="app-content" id="moduleContainer">
-                <?php if (isset($systemError)): ?>
-                    <div class="system-error">
-                        <h4><i class="fas fa-exclamation-triangle"></i> System Error</h4>
-                        <p><?php echo htmlspecialchars($systemError); ?></p>
+                        
+                        <?php if (!empty($activeModules)): ?>
+                            <?php foreach ($activeModules as $module): ?>
+                            <div class="nav-item" onclick="FlowWork.loadModule('<?php echo $module['name']; ?>')">
+                                <i class="<?php echo $module['icon'] ?? 'fas fa-puzzle-piece'; ?>"></i>
+                                <span><?php echo htmlspecialchars($module['display_name']); ?></span>
+                                <span class="nav-badge">Module</span>
+                            </div>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                        <div class="nav-item" onclick="FlowWork.showNotification('AI Research module coming soon!', 'info')">
+                            <i class="fas fa-brain"></i>
+                            <span>AI Research</span>
+                            <span class="nav-badge">Soon</span>
+                        </div>
+                        <?php endif; ?>
+                        
+                        <div class="nav-item" onclick="FlowWork.showNotification('Documents module coming soon!', 'info')">
+                            <i class="fas fa-file-alt"></i>
+                            <span>Documents</span>
+                        </div>
+                        
+                        <div class="nav-item" onclick="FlowWork.showNotification('Team Workspace coming soon!', 'info')">
+                            <i class="fas fa-users"></i>
+                            <span>Team Workspace</span>
+                        </div>
                     </div>
-                <?php endif; ?>
-                
-                <!-- Default welcome content -->
-                <div class="welcome-message" id="welcomeMessage">
-                    <h2>ยินดีต้อนรับสู่ FlowWork 3.0!</h2>
-                    <p>แพลตฟอร์ม AI Assistant ที่ครบครันสำหรับการวิจัยและการทำงาน</p>
-                    <?php if (!empty($activeModules)): ?>
-                        <p>เลือก module จาก sidebar เพื่อเริ่มใช้งาน</p>
-                    <?php else: ?>
-                        <p><a href="?admin=true">ติดตั้ง modules</a> เพื่อเริ่มใช้งาน</p>
-                    <?php endif; ?>
+
+                    <!-- Meeting Intelligence -->
+                    <div class="nav-section">
+                        <div class="nav-section-title">Meeting Intelligence</div>
+                        
+                        <div class="nav-item" onclick="FlowWork.showNotification('Meeting Hub coming soon!', 'info')">
+                            <i class="fas fa-microphone"></i>
+                            <span>Meeting Hub</span>
+                        </div>
+                        
+                        <div class="nav-item" onclick="FlowWork.showNotification('Live Recording coming soon!', 'info')">
+                            <i class="fas fa-record-vinyl" style="color: var(--red-500);"></i>
+                            <span>Live Recording</span>
+                        </div>
+                        
+                        <div class="nav-item" onclick="FlowWork.showNotification('Action Items coming soon!', 'info')">
+                            <i class="fas fa-tasks"></i>
+                            <span>Action Items</span>
+                        </div>
+                    </div>
+
+                    <!-- Tools & Analytics -->
+                    <div class="nav-section">
+                        <div class="nav-section-title">Tools & Analytics</div>
+                        
+                        <div class="nav-item" onclick="FlowWork.showNotification('Analytics coming soon!', 'info')">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Analytics</span>
+                        </div>
+                        
+                        <div class="nav-item" onclick="FlowWork.showNotification('Integrations coming soon!', 'info')">
+                            <i class="fas fa-plug"></i>
+                            <span>Integrations</span>
+                        </div>
+                        
+                        <div class="nav-item" onclick="window.location.href='?admin=true'">
+                            <i class="fas fa-cog"></i>
+                            <span>Settings</span>
+                        </div>
+                    </div>
                 </div>
-            </main>
+
+                <!-- User Profile -->
+                <div class="sidebar-footer">
+                    <div class="user-profile">
+                        <div class="profile-avatar">โล่</div>
+                        <div class="profile-info">
+                            <div class="profile-name">พี่โล่</div>
+                            <div class="profile-role">Team Leader</div>
+                        </div>
+                        <div class="profile-status">Online</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Content Area -->
+        <main class="content-area" id="contentArea">
+            <?php if ($systemError): ?>
+                <div class="system-error">
+                    <h4><i class="fas fa-exclamation-triangle"></i> System Error</h4>
+                    <p><?php echo htmlspecialchars($systemError); ?></p>
+                </div>
+            <?php endif; ?>
             
-        </div>
+            <!-- Loading State -->
+            <div style="text-align: center; padding: 80px 0;">
+                <div class="loading-spinner" style="width: 64px; height: 64px; border-width: 4px; margin: 0 auto 16px;"></div>
+                <h3 style="font-size: 20px; font-weight: 600; color: var(--gray-900); margin-bottom: 8px;">กำลังโหลด FlowWork Dashboard...</h3>
+                <p style="color: var(--gray-600);">กำลังตั้งค่าระบบ...</p>
+            </div>
+        </main>
+
+        <!-- Right Panel -->
+        <aside class="right-panel" id="rightPanel">
+            
+            <!-- Panel Header -->
+            <div class="panel-header">
+                <h3 class="panel-title">Workspace</h3>
+                <div class="panel-controls">
+                    <button class="panel-btn" onclick="SidebarSettings.toggle()">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="panel-btn" onclick="SidebarSettings.hide()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Today's Info -->
+            <div class="info-section">
+                <div class="section-header">
+                    <span class="section-title">Today</span>
+                </div>
+                <div class="info-grid">
+                    <div class="info-card">
+                        <div class="info-content">
+                            <div class="info-main"><?php echo date('j M Y', strtotime('+543 years')); ?></div>
+                            <div class="info-sub"><?php echo date('F j, Y'); ?></div>
+                        </div>
+                        <div class="info-icon">📅</div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <div class="info-content">
+                            <div class="info-main" id="currentTime"><?php echo date('H:i'); ?></div>
+                            <div class="info-sub">Bangkok</div>
+                        </div>
+                        <div class="info-icon">🕐</div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <div class="info-content">
+                            <div class="info-main">28°C</div>
+                            <div class="info-sub">Partly Cloudy</div>
+                        </div>
+                        <div class="info-icon">⛅</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Status -->
+            <div class="info-section">
+                <div class="section-header">
+                    <span class="section-title">System Status</span>
+                    <span class="status-badge"><?php echo empty($systemError) ? 'Active' : 'Error'; ?></span>
+                </div>
+                <div class="info-grid">
+                    <div class="info-card <?php echo empty($systemError) ? 'highlighted' : ''; ?>">
+                        <div class="info-content">
+                            <div class="info-main">FlowWork <?php echo FLOWWORK_VERSION; ?></div>
+                            <div class="info-sub"><?php echo count($activeModules); ?> modules active</div>
+                        </div>
+                        <div class="info-icon"><?php echo empty($systemError) ? '✅' : '⚠️'; ?></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Team Status -->
+            <div class="info-section">
+                <div class="section-header">
+                    <span class="section-title">Team</span>
+                    <span class="status-badge">4 online</span>
+                </div>
+                <div class="team-list">
+                    <div class="team-member">
+                        <div class="member-avatar online">โล่</div>
+                        <div class="member-info">
+                            <div class="member-name">พี่โล่ (You)</div>
+                            <div class="member-status">Testing dashboard</div>
+                        </div>
+                    </div>
+                    
+                    <div class="team-member">
+                        <div class="member-avatar busy">เอ</div>
+                        <div class="member-info">
+                            <div class="member-name">เอ</div>
+                            <div class="member-status">In meeting</div>
+                        </div>
+                    </div>
+                    
+                    <div class="team-member">
+                        <div class="member-avatar away">บี</div>
+                        <div class="member-info">
+                            <div class="member-name">บี</div>
+                            <div class="member-status">Back in 10 min</div>
+                        </div>
+                    </div>
+                    
+                    <div class="team-member">
+                        <div class="member-avatar offline">ซี</div>
+                        <div class="member-info">
+                            <div class="member-name">ซี</div>
+                            <div class="member-status">Offline</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="info-section">
+                <div class="section-header">
+                    <span class="section-title">Quick Actions</span>
+                </div>
+                <div class="action-list">
+                    <?php if (!empty($activeModules)): ?>
+                        <?php $firstModule = $activeModules[0]; ?>
+                        <button onclick="FlowWork.loadModule('<?php echo $firstModule['name']; ?>')" class="action-btn primary">
+                            <i class="<?php echo $firstModule['icon'] ?? 'fas fa-puzzle-piece'; ?>"></i>
+                            <span><?php echo htmlspecialchars($firstModule['display_name']); ?></span>
+                        </button>
+                    <?php else: ?>
+                        <button onclick="FlowWork.showNotification('AI Research coming soon!', 'info')" class="action-btn primary">
+                            <i class="fas fa-brain"></i>
+                            <span>Ask AI</span>
+                        </button>
+                    <?php endif; ?>
+                    
+                    <button onclick="FlowWork.showNotification('Live Recording coming soon!', 'info')" class="action-btn danger">
+                        <i class="fas fa-record-vinyl"></i>
+                        <span>Record</span>
+                    </button>
+                    
+                    <button onclick="window.location.href='?admin=true'" class="action-btn info">
+                        <i class="fas fa-cog"></i>
+                        <span>Admin Panel</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- System Stats -->
+            <div class="info-section minimal-hide">
+                <div class="section-header">
+                    <span class="section-title">Performance</span>
+                    <span class="status-badge">Good</span>
+                </div>
+                <div class="system-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">PHP</span>
+                        <span class="stat-value"><?php echo PHP_VERSION; ?></span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Memory</span>
+                        <span class="stat-value"><?php echo ini_get('memory_limit'); ?></span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Modules</span>
+                        <span class="stat-value"><?php echo count($activeModules); ?></span>
+                    </div>
+                </div>
+            </div>
+        </aside>
     </div>
-    
-    <!-- Global FlowWork Object -->
+
+    <!-- FlowWork JavaScript -->
     <script>
-        window.FlowWork = {
+        // Global FlowWork Configuration
+        window.FlowWorkConfig = {
             version: '<?php echo FLOWWORK_VERSION; ?>',
             modules: <?php echo json_encode($activeModules); ?>,
-            currentModule: null,
-            hooks: {},
-            
-            // Hook system
-            addHook: function(hookName, callback) {
-                if (!this.hooks[hookName]) {
-                    this.hooks[hookName] = [];
-                }
-                this.hooks[hookName].push(callback);
-            },
-            
-            runHook: function(hookName, data) {
-                if (this.hooks[hookName]) {
-                    this.hooks[hookName].forEach(callback => {
-                        try {
-                            callback(data);
-                        } catch (e) {
-                            console.error('Hook error:', e);
-                        }
-                    });
-                }
-            },
-            
-            // Module management
-            loadModule: function(moduleName) {
-                console.log('🔄 Loading module:', moduleName);
-                
-                // Update active nav item
-                document.querySelectorAll('.nav-item').forEach(item => {
-                    item.classList.remove('active');
-                });
-                
-                const module = this.modules.find(m => m.name === moduleName);
-                if (module && window[module.name + 'Module']) {
-                    this.currentModule = moduleName;
-                    this.runHook('module.before_load', module);
-                    
-                    // Hide welcome message
-                    const welcomeMsg = document.getElementById('welcomeMessage');
-                    if (welcomeMsg) welcomeMsg.style.display = 'none';
-                    
-                    if (window[module.name + 'Module'].render) {
-                        const container = document.getElementById('moduleContainer');
-                        try {
-                            window[module.name + 'Module'].render(container);
-                        } catch (e) {
-                            console.error('Module render error:', e);
-                            container.innerHTML = `<div class="system-error">
-                                <h4>Module Error</h4>
-                                <p>Failed to load ${moduleName}: ${e.message}</p>
-                            </div>`;
-                        }
-                    }
-                    
-                    this.runHook('module.after_load', module);
-                    console.log('✅ Module loaded:', moduleName);
-                    
-                    // Update nav active state
-                    const navItem = document.querySelector(`[data-module="${moduleName}"]`);
-                    if (navItem) navItem.classList.add('active');
-                    
-                } else if (moduleName === 'dashboard') {
-                    // Default dashboard
-                    this.loadDashboard();
-                } else {
-                    console.error('Module not found:', moduleName);
-                }
-            },
-            
-            loadDashboard: function() {
-                const container = document.getElementById('moduleContainer');
-                const welcomeMsg = document.getElementById('welcomeMessage');
-                if (welcomeMsg) welcomeMsg.style.display = 'block';
-                
-                // Update nav
-                document.querySelectorAll('.nav-item').forEach(item => {
-                    item.classList.remove('active');
-                });
-                document.querySelector('.nav-item').classList.add('active');
-            },
-            
-            // Navigation management
-            addNavItem: function(item) {
-                console.log('➕ Adding nav item:', item);
-                const nav = document.getElementById('moduleNavigation');
-                const navItem = document.createElement('div');
-                navItem.className = 'nav-item';
-                navItem.setAttribute('data-module', item.module);
-                navItem.innerHTML = `
-                    <i class="${item.icon}"></i>
-                    <span>${item.title}</span>
-                    ${item.badge ? `<span class="nav-badge">${item.badge}</span>` : ''}
-                `;
-                navItem.onclick = () => this.loadModule(item.module);
-                nav.appendChild(navItem);
-            },
-            
-            // System initialization
-            init: function() {
-                console.log('🚀 FlowWork ' + this.version + ' - Initializing...');
-                
-                // Initialize all modules
-                this.modules.forEach(module => {
-                    if (window[module.name + 'Module'] && window[module.name + 'Module'].init) {
-                        console.log('📦 Initializing module:', module.name);
-                        try {
-                            window[module.name + 'Module'].init();
-                        } catch (e) {
-                            console.error('Module init error:', e);
-                        }
-                    }
-                });
-                
-                // Hide loading screen
-                document.getElementById('loadingScreen').style.display = 'none';
-                document.getElementById('flowworkApp').style.display = 'block';
-                
-                console.log('✅ FlowWork initialized successfully!');
-                console.log('📊 Active modules:', this.modules.length);
-            }
+            hasError: <?php echo isset($systemError) ? 'true' : 'false'; ?>,
+            adminUrl: '?admin=true'
         };
-        
-        // Global loadModule function for backward compatibility
-        function loadModule(moduleName) {
-            FlowWork.loadModule(moduleName);
-        }
-        
-        // Auto-initialize when DOM ready
-        document.addEventListener('DOMContentLoaded', function() {
-            FlowWork.init();
-            // หลังจาก FlowWork.init() เพิ่ม:
-init: function() {
-    console.log('🚀 FlowWork ' + this.version + ' - Initializing...');
-    
-    // Force show app
-    document.getElementById('flowworkApp').style.display = 'block';
-    document.getElementById('loadingScreen').style.display = 'none';
-    
-    // ... rest of init code
-}
-        });
     </script>
+    <script src="assets/js/app.js"></script>
     
     <!-- Module Scripts -->
     <?php foreach ($activeModules as $module): ?>
         <?php if (isset($module['assets']['js'])): ?>
-            <script src="modules/installed/<?php echo $module['name']; ?>/<?php echo $module['assets']['js']; ?>"></script>
+            <?php $jsPath = "modules/installed/" . $module['name'] . "/" . $module['assets']['js']; ?>
+            <?php if (file_exists($jsPath)): ?>
+                <script src="<?php echo $jsPath; ?>"></script>
+            <?php endif; ?>
         <?php endif; ?>
     <?php endforeach; ?>
-    
 </body>
 </html>
