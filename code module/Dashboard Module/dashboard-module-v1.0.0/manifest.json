@@ -1,0 +1,36 @@
+{
+    "name": "dashboard",
+    "version": "1.0.0",
+    "display_name": "FlowWork Dashboard",
+    "description": "Main dashboard with analytics, quick actions, and team overview",
+    "icon": "🏠",
+    "author": "FlowWork Team",
+    "type": "core-module",
+    "load_priority": 1,
+    "requires": {
+        "core_version": ">=3.0.0",
+        "php": ">=8.0"
+    },
+    "assets": {
+        "css": "ui/dashboard.css",
+        "js": "ui/dashboard.js"
+    },
+    "routes": {
+        "/": "renderDashboard",
+        "/dashboard": "renderDashboard"
+    },
+    "navigation": {
+        "title": "Dashboard",
+        "icon": "fas fa-home",
+        "priority": 1,
+        "section": "main"
+    },
+    "permissions": [
+        "view_dashboard",
+        "view_analytics"
+    ],
+    "hooks": [
+        "dashboard.init",
+        "dashboard.render"
+    ]
+}

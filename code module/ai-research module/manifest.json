@@ -1,0 +1,27 @@
+{
+    "name": "ai-research",
+    "version": "1.0.0",
+    "display_name": "AI Research Assistant",
+    "description": "ระบบวิจัยด้วย AI แบบ multi-provider พร้อมระบบ persona และ credit management",
+    "icon": "🧠",
+    "author": "FlowWork Team",
+    "requires": {
+        "core_version": ">=3.0.0",
+        "php_version": ">=8.0"
+    },
+    "assets": {
+        "css": "assets/ai-research.css",
+        "js": "assets/ai-research.js"
+    },
+    "permissions": [
+        "api_access",
+        "file_export",
+        "team_sharing"
+    ],
+    "config": {
+        "default_ai_provider": "openai",
+        "max_research_length": 5000,
+        "supported_export_formats": ["word", "pdf", "html"],
+        "credit_cost_per_query": 5
+    }
+}

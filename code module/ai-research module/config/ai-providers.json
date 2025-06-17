@@ -1,0 +1,161 @@
+{
+    "openai": {
+      "name": "OpenAI GPT-4",
+      "description": "AI ชั้นนำด้วยความสามารถในการวิเคราะห์และการใช้เหตุผลขั้นสูง",
+      "provider": "OpenAI",
+      "model": "gpt-4",
+      "endpoint": "https://api.openai.com/v1/chat/completions",
+      "capabilities": [
+        "การวิเคราะห์เชิงลึก",
+        "การใช้เหตุผลที่ซับซ้อน",
+        "การสร้างเนื้อหาที่หลากหลาย",
+        "การตอบคำถามที่ซับซ้อน"
+      ],
+      "strengths": [
+        "ความแม่นยำสูงในการวิเคราะห์",
+        "ความเข้าใจบริบทที่ดี",
+        "การตอบสนองที่สม่ำเสมอ"
+      ],
+      "best_for": [
+        "การวิจัยที่ต้องการความแม่นยำสูง",
+        "การวิเคราะห์ข้อมูลที่ซับซ้อน",
+        "งานที่ต้องการการใช้เหตุผลขั้นสูง"
+      ],
+      "parameters": {
+        "max_tokens": 4000,
+        "temperature": 0.7,
+        "top_p": 1.0,
+        "frequency_penalty": 0,
+        "presence_penalty": 0
+      },
+      "pricing": {
+        "cost_per_1k_tokens": 0.03,
+        "currency": "USD"
+      },
+      "limitations": [
+        "ข้อมูลตัดขาดเมื่อ 2023",
+        "ไม่สามารถเข้าถึงอินเทอร์เน็ตได้",
+        "ค่าใช้จ่ายสูงกว่า AI รุ่นอื่น"
+      ],
+      "language_support": {
+        "thai": "ดี",
+        "english": "ยอดเยี่ยม",
+        "multilingual": "ดี"
+      },
+      "response_time": "2-5 วินาที",
+      "reliability": 99.5,
+      "available": true
+    },
+    "claude": {
+      "name": "Anthropic Claude",
+      "description": "AI ที่เชี่ยวชาญด้านการเขียนและการวิเคราะห์เนื้อหายาว",
+      "provider": "Anthropic",
+      "model": "claude-3-sonnet-20240229",
+      "endpoint": "https://api.anthropic.com/v1/messages",
+      "capabilities": [
+        "การเขียนเนื้อหายาว",
+        "การสรุปและสังเคราะห์",
+        "การวิเคราะห์เอกสาร",
+        "การคิดเชิงวิพากษ์"
+      ],
+      "strengths": [
+        "การจัดการข้อความยาวได้ดี",
+        "การสรุปที่แม่นยำ",
+        "การเขียนที่มีคุณภาพสูง",
+        "ความปลอดภัยและจริยธรรม"
+      ],
+      "best_for": [
+        "การวิจัยที่ต้องการเนื้อหายาว",
+        "การสรุปเอกสารขนาดใหญ่",
+        "การเขียนรายงานที่ละเอียด",
+        "การวิเคราะห์วรรณกรรม"
+      ],
+      "parameters": {
+        "max_tokens": 4000,
+        "temperature": 0.7,
+        "top_p": 1.0,
+        "top_k": 40
+      },
+      "pricing": {
+        "cost_per_1k_tokens": 0.025,
+        "currency": "USD"
+      },
+      "limitations": [
+        "ข้อมูลตัดขาดเมื่อต้น 2024",
+        "ไม่สามารถเข้าถึงอินเทอร์เน็ตได้",
+        "การตอบสนองอาจช้ากว่า GPT-4"
+      ],
+      "language_support": {
+        "thai": "ดี",
+        "english": "ยอดเยี่ยม",
+        "multilingual": "ดี"
+      },
+      "response_time": "3-8 วินาที",
+      "reliability": 99.2,
+      "available": true
+    },
+    "typhoon": {
+      "name": "SCB Typhoon",
+      "description": "AI ที่พัฒนาโดยธนาคารไทยพาณิชย์ เหมาะสำหรับภาษาไทย",
+      "provider": "SCB TechX",
+      "model": "typhoon-v1.5x-70b-instruct",
+      "endpoint": "https://api.opentyphoon.ai/v1/chat/completions",
+      "capabilities": [
+        "ความเข้าใจภาษาไทยขั้นสูง",
+        "บริบททางวัฒนธรรมไทย",
+        "การแปลไทย-อังกฤษ",
+        "ข้อมูลเฉพาะประเทศไทย"
+      ],
+      "strengths": [
+        "ความเข้าใจภาษาไทยที่ยอดเยี่ยม",
+        "ความรู้เกี่ยวกับบริบทไทย",
+        "ราคาที่ประหยัด",
+        "การสนับสนุนจากท้องถิ่น"
+      ],
+      "best_for": [
+        "การวิจัยเกี่ยวกับประเทศไทย",
+        "เนื้อหาที่ต้องการความเข้าใจทางวัฒนธรรม",
+        "การแปลและการสื่อสารภาษาไทย",
+        "โครงการที่มีงบประมาณจำกัด"
+      ],
+      "parameters": {
+        "max_tokens": 4000,
+        "temperature": 0.7,
+        "top_p": 0.9,
+        "repetition_penalty": 1.1
+      },
+      "pricing": {
+        "cost_per_1k_tokens": 0.02,
+        "currency": "USD"
+      },
+      "limitations": [
+        "ความรู้ทั่วไปอาจไม่ครอบคลุมเท่า GPT-4",
+        "การใช้เหตุผลที่ซับซ้อนอาจจำกัด",
+        "ยังอยู่ในช่วงพัฒนา"
+      ],
+      "language_support": {
+        "thai": "ยอดเยี่ยม",
+        "english": "ดี",
+        "multilingual": "จำกัด"
+      },
+      "response_time": "2-4 วินาที",
+      "reliability": 98.5,
+      "available": true
+    },
+    "auto": {
+      "name": "Auto Selection",
+      "description": "เลือก AI ที่เหมาะสมอัตโนมัติตามลักษณะงาน",
+      "selection_criteria": {
+        "thai_content": "typhoon",
+        "comprehensive_research": "claude",
+        "complex_analysis": "openai",
+        "default": "openai"
+      },
+      "rules": [
+        "ถ้าเป็นเนื้อหาภาษาไทยหรือเกี่ยวกับไทย → Typhoon",
+        "ถ้าต้องการการวิจัยครอบคลุม → Claude",
+        "ถ้าต้องการการวิเคราะห์ซับซ้อน → OpenAI",
+        "กรณีอื่นๆ → OpenAI (default)"
+      ]
+    }
+  }

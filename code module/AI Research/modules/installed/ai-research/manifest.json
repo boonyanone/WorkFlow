@@ -1,0 +1,47 @@
+{
+    "name": "ai-research",
+    "version": "1.0.0",
+    "display_name": "AI Research Assistant",
+    "description": "ระบบวิจัยด้วย AI แบบ Multi-provider พร้อม Persona และ Team Collaboration",
+    "icon": "fas fa-brain",
+    "author": "FlowWork Team",
+    "category": "research",
+    "requires": {
+      "core_version": ">=3.0.0",
+      "php_version": ">=8.0"
+    },
+    "permissions": [
+      "api_access",
+      "file_upload",
+      "team_management",
+      "external_integration"
+    ],
+    "assets": {
+      "css": "assets/ai-research.css",
+      "js": "assets/ai-research.js"
+    },
+    "api_endpoints": [
+      "/api/research/query",
+      "/api/research/export", 
+      "/api/team/create",
+      "/api/team/invite"
+    ],
+    "oauth_scopes": {
+      "google": [
+        "https://www.googleapis.com/auth/documents",
+        "https://www.googleapis.com/auth/drive.file",
+        "https://www.googleapis.com/auth/chat.spaces"
+      ],
+      "microsoft": [
+        "https://graph.microsoft.com/Files.ReadWrite",
+        "https://graph.microsoft.com/Chat.ReadWrite"
+      ]
+    },
+    "settings": {
+      "default_ai_model": "auto",
+      "max_credits_per_query": 50,
+      "enable_team_features": true,
+      "default_export_format": "google_docs"
+    },
+    "installed_at": "2025-06-16T10:00:00Z"
+  }

@@ -1,0 +1,152 @@
+<div class="ai-research-container">
+    <!-- Header -->
+    <div class="research-header">
+        <div class="header-content">
+            <div class="header-left">
+                <h1><i class="fas fa-brain"></i> AI Research Assistant</h1>
+                <p>วิจัยข้อมูลด้วย AI แบบครบถ้วน พร้อมระบบ persona และ multi-AI</p>
+            </div>
+            <div class="header-right">
+                <div class="credit-display">
+                    <i class="fas fa-coins"></i>
+                    <span id="creditBalance">Loading...</span> Credits
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="research-content">
+        
+        <!-- Persona Selection -->
+        <div class="persona-section">
+            <h3><i class="fas fa-user-tie"></i> เลือกบุคลิก AI</h3>
+            <div class="persona-grid">
+                <div class="persona-card" data-persona="researcher">
+                    <div class="persona-icon">🔬</div>
+                    <h4>นักวิจัย</h4>
+                    <p>วิเคราะห์อย่างลึกซึ้ง อ้างอิงวิชาการ</p>
+                </div>
+                <div class="persona-card" data-persona="analyst">
+                    <div class="persona-icon">📊</div>
+                    <h4>นักวิเคราะห์</h4>
+                    <p>มุ่งเน้นข้อมูล สถิติ และแนวโน้ม</p>
+                </div>
+                <div class="persona-card" data-persona="consultant">
+                    <div class="persona-icon">💼</div>
+                    <h4>ที่ปรึกษา</h4>
+                    <p>คำแนะนำเชิงธุรกิจ แนวทางปฏิบัติ</p>
+                </div>
+                <div class="persona-card" data-persona="writer">
+                    <div class="persona-icon">✍️</div>
+                    <h4>นักเขียน</h4>
+                    <p>เนื้อหาที่อ่านง่าย สื่อสารชัดเจน</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Research Input -->
+        <div class="research-input-section">
+            <h3><i class="fas fa-search"></i> หัวข้อวิจัย</h3>
+            
+            <div class="input-group">
+                <label for="researchTopic">หัวข้อที่ต้องการวิจัย</label>
+                <input type="text" id="researchTopic" placeholder="เช่น: แนวโน้มการใช้ AI ในธุรกิจไทย 2025">
+            </div>
+            
+            <div class="input-group">
+                <label for="researchDetails">รายละเอียดเพิ่มเติม (ไม่บังคับ)</label>
+                <textarea id="researchDetails" rows="3" placeholder="ระบุขอบเขต จุดมุ่งหมาย หรือคำถามเฉพาะ..."></textarea>
+            </div>
+
+            <div class="research-options">
+                <div class="option-row">
+                    <div class="option-group">
+                        <label for="researchDepth">ความลึก</label>
+                        <select id="researchDepth">
+                            <option value="basic">พื้นฐาน (5 credits)</option>
+                            <option value="detailed" selected>ละเอียด (8 credits)</option>
+                            <option value="comprehensive">ครบถ้วน (12 credits)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="option-group">
+                        <label for="researchLanguage">ภาษา</label>
+                        <select id="researchLanguage">
+                            <option value="th" selected>ไทย</option>
+                            <option value="en">English</option>
+                            <option value="both">ทั้งสองภาษา</option>
+                        </select>
+                    </div>
+                    
+                    <div class="option-group">
+                        <label for="aiProvider">AI Provider</label>
+                        <select id="aiProvider">
+                            <option value="auto" selected>Auto (แนะนำ)</option>
+                            <option value="openai">GPT-4</option>
+                            <option value="claude">Claude</option>
+                            <option value="typhoon">Typhoon</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cost Preview -->
+            <div class="cost-preview">
+                <div class="cost-info">
+                    <span class="cost-label">ต้นทุนโดยประมาณ:</span>
+                    <span class="cost-amount" id="estimatedCost">8 credits</span>
+                    <span class="cost-baht">(≈ ฿12.80)</span>
+                </div>
+            </div>
+
+            <!-- Start Research Button -->
+            <div class="action-buttons">
+                <button id="startResearchBtn" class="btn-primary btn-large">
+                    <i class="fas fa-play"></i>
+                    เริ่มวิจัย
+                </button>
+            </div>
+        </div>
+
+        <!-- Research Progress -->
+        <div id="researchProgress" class="research-progress" style="display: none;">
+            <div class="progress-header">
+                <h3><i class="fas fa-spinner fa-spin"></i> กำลังวิจัย...</h3>
+                <button id="cancelResearchBtn" class="btn-secondary">ยกเลิก</button>
+            </div>
+            
+            <div class="progress-steps">
+                <div class="step active" id="step1">
+                    <div class="step-icon">1</div>
+                    <div class="step-text">วิเคราะห์หัวข้อ</div>
+                </div>
+                <div class="step" id="step2">
+                    <div class="step-icon">2</div>
+                    <div class="step-text">ค้นหาข้อมูล</div>
+                </div>
+                <div class="step" id="step3">
+                    <div class="step-icon">3</div>
+                    <div class="step-text">สังเคราะห์ผล</div>
+                </div>
+                <div class="step" id="step4">
+                    <div class="step-icon">4</div>
+                    <div class="step-text">จัดรูปแบบ</div>
+                </div>
+            </div>
+            
+            <div class="progress-details">
+                <div id="progressText">เริ่มต้นการวิจัย...</div>
+                <div class="progress-bar">
+                    <div id="progressFill" class="progress-fill"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Research Results -->
+        <div id="researchResults" class="research-results" style="display: none;">
+            <!-- Will be populated by JavaScript -->
+        </div>
+
+    </div>
+</div>
